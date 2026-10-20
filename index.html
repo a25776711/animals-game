@@ -1,0 +1,56 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, user-scalable=no">
+  <meta name="theme-color" content="#ffe6d1">
+  <title>動物消消樂</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <main id="app">
+    <button id="backBtn" class="btn back hidden" type="button">← 返回</button>
+
+    <!-- 標題畫面 -->
+    <section id="titleScreen" class="screen active" aria-label="標題">
+      <h1 class="logo">動物消消樂</h1>
+      <p class="tap-hint">點擊畫面開始</p>
+    </section>
+
+    <!-- 選包數畫面 -->
+    <section id="startScreen" class="screen" aria-label="選擇起始包數">
+      <h2 class="heading">選擇起始包數</h2>
+      <div id="packOptions" class="pack-options"></div>
+    </section>
+
+    <!-- 遊戲畫面 -->
+    <section id="playScreen" class="screen" aria-label="遊戲">
+      <div class="hud">
+        <div class="pill">剩餘包數：<b id="packCount">0</b></div>
+        <div class="pill small">回合 <b id="roundCount">0</b></div>
+      </div>
+
+      <div id="board" class="board" role="grid" aria-label="3x3 九宮格"></div>
+
+      <p id="message" class="message" aria-live="polite">按「開包」開始！</p>
+      <button id="spinBtn" class="btn primary" type="button">開包</button>
+      <button id="cashOutBtn" class="btn secondary" type="button">結算</button>
+    </section>
+
+    <!-- 結果畫面 -->
+    <section id="resultScreen" class="screen" aria-label="結果">
+      <h2 class="heading">包數用完了！</h2>
+      <div class="result-card">
+        <div class="row"><span>起始包數</span><b id="resStart">0</b></div>
+        <div class="row"><span>包數變化</span><b id="resGained">0</b></div>
+        <div class="row"><span>回合數</span><b id="resRounds">0</b></div>
+        <div class="row"><span>歷史最高回合</span><b id="resBest">0</b></div>
+      </div>
+      <button id="againBtn" class="btn primary" type="button">再玩一次</button>
+    </section>
+  </main>
+
+  <script src="logic.js"></script>
+  <script src="game.js"></script>
+</body>
+</html>
