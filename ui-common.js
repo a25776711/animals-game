@@ -7,7 +7,7 @@
     var el = app.el;
     var cap = Math.min(opts.max, opts.turtles);
     var box = el('div', 'bet-box');
-    box.appendChild(el('div', 'bet-amount', '下注 ' + app.fmt(opts.bet) + ' 烏龜'));
+    box.appendChild(el('div', 'bet-amount', '下注 ' + app.fmt(opts.bet) + ' 隻烏龜'));
 
     var chips = el('div', 'chips');
     CHIPS.forEach(function (v) {

@@ -22,7 +22,7 @@
         var from = i === 0 ? 0 : M.REWARDS[i - 1].max + 1;
         return t.max === Infinity ? from + ' 步以上 ' + t.reward : (i === 0 ? '≤' + t.max : from + '～' + t.max) + ' 步 ' + t.reward;
       });
-      return '報名 ' + M.FEE + ' 烏龜，8 對牌，步數（每翻兩張算一步）越少獎勵越多：' + tiers.join('、') + '。中途離開不退費。';
+      return '報名 ' + M.FEE + ' 隻烏龜，8 對牌，步數（每翻兩張算一步）越少獎勵越多：' + tiers.join('、') + '。中途離開不退費。';
     }
 
     function render() {

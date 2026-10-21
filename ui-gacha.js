@@ -42,7 +42,7 @@
       [[1, G.COST.single, '單抽'], [10, G.COST.ten, '十連']].forEach(function (o) {
         var b = el('button', 'btn', o[2]);
         b.type = 'button';
-        b.appendChild(el('small', null, '-' + o[1] + ' 烏龜'));
+        b.appendChild(el('small', null, '-' + o[1] + ' 隻烏龜'));
         b.disabled = turtles < o[1];
         b.addEventListener('click', function () { draw(o[0], o[1]); });
         actions.appendChild(b);

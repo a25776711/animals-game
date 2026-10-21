@@ -418,6 +418,28 @@ body {
   white-space: nowrap;
 }
 .wallet-pill img { width: 1.5em; height: 1.5em; object-fit: contain; }
+.coin-icon {
+  position: relative;
+  display: inline-block;
+  flex: none;
+  width: 1.3em;
+  height: 1.3em;
+  border-radius: 50%;
+  border: 2px solid #b07a00;
+  background: radial-gradient(circle at 35% 30%, #fff3b0, #f5c518 55%, #d99a00);
+}
+.coin-icon::after {
+  content: '';
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: 0.36em;
+  height: 0.36em;
+  transform: translate(-50%, -50%);
+  border: 2px solid #b07a00;
+  background: var(--cream-top);
+}
+
 
 .menu-row .btn { position: relative; }
 .dot {

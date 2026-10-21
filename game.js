@@ -26,7 +26,7 @@
   var HUB_GAMES = [
     { id: 'race', icon: '🏁', name: '烏龜賽跑', desc: '押一隻烏龜，賠率最高 16 倍' },
     { id: 'bj', icon: '🃏', name: '21 點', desc: '跟莊家比點數，Blackjack 賠 6:5' },
-    { id: 'mem', icon: '🧠', name: '翻牌記憶', desc: '報名 50 烏龜，步數越少獎勵越多' },
+    { id: 'mem', icon: '🧠', name: '翻牌記憶', desc: '報名 50 隻烏龜，步數越少獎勵越多' },
     { id: 'gacha', icon: '🎰', name: '抽卡圖鑑', desc: '抽 4 種稀有度的烏龜卡，集滿 36 種' }
   ];
   var BACK = { start: 'title', hub: 'title', supply: 'title', race: 'hub', bj: 'hub', mem: 'hub', gacha: 'hub' };
@@ -133,7 +133,7 @@
     var pill = el('div', 'wallet-pill');
     pill.setAttribute('data-kind', kind);
     if (kind === 'money') {
-      pill.appendChild(el('span', null, '🪙'));
+      pill.appendChild(el('span', 'coin-icon'));
     } else {
       var img = el('img');
       img.src = COLORS[0].img;
@@ -141,7 +141,7 @@
       pill.appendChild(img);
     }
     pill.appendChild(el('b', null, '0'));
-    pill.appendChild(el('small', null, kind === 'money' ? '錢' : '烏龜'));
+    pill.appendChild(el('small', null, kind === 'money' ? '錢' : '隻烏龜'));
     return pill;
   }
 
@@ -824,7 +824,10 @@
   };
 
   screens.title.addEventListener('click', function (e) {
-    if (e.target.closest('.account, .menu-row, .wallet-row')) return;
+    var blocked = e.composedPath().some(function (n) {
+      return n.classList && (n.classList.contains('account') || n.classList.contains('menu-row') || n.classList.contains('wallet-row'));
+    });
+    if (blocked) return;
     show('start');
   });
   $('achBtn').addEventListener('click', function () { returnTo = 'title'; show('ach'); });
