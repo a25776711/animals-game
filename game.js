@@ -189,6 +189,7 @@
   function record(kind, data) {
     var unlocked = P.record(profile, kind, data, Date.now());
     persist();
+    refreshWallets();
     notify(unlocked);
   }
 

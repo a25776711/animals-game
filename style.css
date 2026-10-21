@@ -226,8 +226,8 @@ body {
 
 .board {
   --gap: 10px;
-  width: min(92%, 440px, max(200px, calc(100vh - 430px)));
-  width: min(92%, 440px, max(200px, calc(100dvh - 430px)));
+  width: min(92%, 440px, max(200px, calc(100vh - 480px)));
+  width: min(92%, 440px, max(200px, calc(100dvh - 480px)));
   aspect-ratio: 1;
   display: grid;
   grid-template: repeat(3, 1fr) / repeat(3, 1fr);
@@ -718,8 +718,8 @@ body {
   .message { font-size: 26px; }
   .board {
     --gap: 14px;
-    width: min(560px, max(200px, calc(100vh - 430px)));
-    width: min(560px, max(200px, calc(100dvh - 430px)));
+    width: min(560px, max(200px, calc(100vh - 480px)));
+    width: min(560px, max(200px, calc(100dvh - 480px)));
   }
 }
 
