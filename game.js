@@ -27,9 +27,11 @@
     { id: 'race', icon: '🏁', name: '烏龜賽跑', desc: '押一隻烏龜，賠率最高 16 倍' },
     { id: 'bj', icon: '🃏', name: '21 點', desc: '跟莊家比點數，Blackjack 賠 6:5' },
     { id: 'mem', icon: '🧠', name: '翻牌記憶', desc: '報名 50 隻烏龜，步數越少獎勵越多' },
-    { id: 'gacha', icon: '🎰', name: '抽卡圖鑑', desc: '抽 4 種稀有度的烏龜卡，集滿 36 種' }
+    { id: 'gacha', icon: '🎰', name: '抽卡圖鑑', desc: '抽 4 種稀有度的烏龜卡，集滿 36 種' },
+    { id: 'pet', icon: '🐣', name: '養龜', desc: '餵小龜長大，替牠換顏色、戴帽子' },
+    { id: 'shop', icon: '🛍️', name: '裝飾商店', desc: '買背景、棋盤花紋和小龜的配件' }
   ];
-  var BACK = { start: 'title', hub: 'title', supply: 'title', race: 'hub', bj: 'hub', mem: 'hub', gacha: 'hub' };
+  var BACK = { start: 'title', hub: 'title', supply: 'title', race: 'hub', bj: 'hub', mem: 'hub', gacha: 'hub', pet: 'hub', shop: 'hub' };
 
   var THEME_KEY = 'turtle.theme';
   var LUCKY_KEY = 'turtle.lucky';
@@ -357,6 +359,7 @@
       var gift = E.grantFirstLogin(profile, Date.now());
       P.save(profile);
       refreshWallets();
+      applySkin();
       if (gift) giftDialog();
       var rev = profile.rev;
       return Cloud.saveProfile(profile).then(function () {
@@ -709,6 +712,11 @@
 
   /* 設定 */
 
+  function applySkin() {
+    document.documentElement.setAttribute('data-skin', profile.shop.theme);
+    board.setAttribute('data-board', profile.shop.board);
+  }
+
   function applyTheme(t) {
     document.documentElement.setAttribute('data-theme', t);
     var meta = document.querySelector('meta[name="theme-color"]');
@@ -817,6 +825,8 @@
     notify: notify,
     toastText: toastText,
     show: show,
+    open: function (name) { ui[name].open(); },
+    applySkin: function () { applySkin(); },
     openModal: openModal,
     walletRow: walletRow,
     refreshWallets: refreshWallets,
@@ -874,6 +884,9 @@
   ui.race = window.TurtleRaceUI.create(app);
   ui.bj = window.TurtleBlackjackUI.create(app);
   ui.mem = window.TurtleMemoryUI.create(app);
+  ui.pet = window.TurtlePetUI.create(app);
+  ui.shop = window.TurtleShopUI.create(app);
+  applySkin();
   renderAccount();
   if (Cloud && Cloud.enabled) {
     Cloud.onAuth(function (user) {

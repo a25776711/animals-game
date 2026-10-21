@@ -29,7 +29,7 @@
       <div class="wallet-row" data-kinds="money,turtles"></div>
       <div class="menu-row">
         <button id="supplyBtn" class="btn secondary" type="button">🎁 補給<i id="supplyDot" class="dot hidden"></i></button>
-        <button id="hubBtn" class="btn secondary" type="button">🎮 小遊戲</button>
+        <button id="hubBtn" class="btn secondary" type="button">🎮 烏龜廣場</button>
         <button id="achBtn" class="btn secondary" type="button">🏆 成就</button>
       </div>
       <div class="account hidden"></div>
@@ -72,7 +72,7 @@
       <div id="resAch" class="res-ach hidden"></div>
       <div class="menu-row">
         <button id="againBtn" class="btn primary" type="button">再玩一次</button>
-        <button id="resHubBtn" class="btn secondary" type="button">🎮 小遊戲</button>
+        <button id="resHubBtn" class="btn secondary" type="button">🎮 烏龜廣場</button>
         <button id="resAchBtn" class="btn secondary" type="button">🏆 成就</button>
       </div>
     </section>
@@ -86,13 +86,15 @@
 
     <section id="supplyScreen" class="screen scroll" aria-label="補給站"></section>
 
-    <section id="hubScreen" class="screen scroll" aria-label="小遊戲">
-      <h2 class="heading">小遊戲</h2>
+    <section id="hubScreen" class="screen scroll" aria-label="烏龜廣場">
+      <h2 class="heading">烏龜廣場</h2>
       <div class="wallet-row" data-kinds="turtles"></div>
-      <p class="ach-note">小遊戲用「烏龜」當籌碼。烏龜從「烏龜對對碰」開包獲得。</p>
+      <p class="ach-note">玩小遊戲、養龜、逛商店都用「烏龜」。烏龜從「烏龜對對碰」開包獲得。</p>
       <div id="hubList" class="hub-list"></div>
     </section>
 
+    <section id="petScreen" class="screen scroll" aria-label="養龜"></section>
+    <section id="shopScreen" class="screen scroll" aria-label="裝飾商店"></section>
     <section id="raceScreen" class="screen scroll" aria-label="烏龜賽跑"></section>
     <section id="bjScreen" class="screen scroll" aria-label="21 點"></section>
     <section id="memScreen" class="screen scroll" aria-label="翻牌記憶"></section>
@@ -108,11 +110,15 @@
   <script src="blackjack.js"></script>
   <script src="race.js"></script>
   <script src="memory.js"></script>
+  <script src="pet.js"></script>
+  <script src="shop.js"></script>
   <script src="cloud.js"></script>
   <script src="sound.js"></script>
   <script src="ui-common.js"></script>
   <script src="ui-supply.js"></script>
   <script src="ui-gacha.js"></script>
+  <script src="ui-pet.js"></script>
+  <script src="ui-shop.js"></script>
   <script src="ui-race.js"></script>
   <script src="ui-bj.js"></script>
   <script src="ui-mem.js"></script>

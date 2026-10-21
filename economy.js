@@ -135,7 +135,7 @@
   }
 
   var api = {
-    CFG: CFG, dayKey: dayKey, dailyStatus: dailyStatus, spinWheel: spinWheel, wheelExpected: wheelExpected,
+    CFG: CFG, clock: clock, dayKey: dayKey, dailyStatus: dailyStatus, spinWheel: spinWheel, wheelExpected: wheelExpected,
     claimDaily: claimDaily, grantStarter: grantStarter, grantFirstLogin: grantFirstLogin,
     buyPacks: buyPacks, refundPacks: refundPacks, spendTurtles: spendTurtles, earnTurtles: earnTurtles
   };
