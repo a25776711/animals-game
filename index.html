@@ -10,24 +10,30 @@
 <body>
   <main id="app">
     <button id="backBtn" class="btn back hidden" type="button">← 返回</button>
+    <div id="toasts" class="toasts" aria-live="polite"></div>
 
-    <!-- 標題畫面 -->
     <section id="titleScreen" class="screen active" aria-label="標題">
       <h1 class="logo">動物消消樂</h1>
       <p class="tap-hint">點擊畫面開始</p>
+      <div class="menu-row">
+        <button id="achBtn" class="btn secondary" type="button">🏆 成就</button>
+      </div>
+      <div class="account hidden"></div>
     </section>
 
-    <!-- 選包數畫面 -->
-    <section id="startScreen" class="screen" aria-label="選擇起始包數">
-      <h2 class="heading">選擇起始包數</h2>
+    <section id="startScreen" class="screen" aria-label="開局設定">
+      <h2 class="heading">選擇幸運色</h2>
+      <div id="luckyPicker" class="lucky-picker" role="radiogroup" aria-label="幸運色"></div>
+      <h2 class="heading sub">選擇起始包數</h2>
       <div id="packOptions" class="pack-options"></div>
+      <p class="rules">空一格開一包・碰 +1・連線 +3・全家福 +5・幸運色 +1</p>
     </section>
 
-    <!-- 遊戲畫面 -->
     <section id="playScreen" class="screen" aria-label="遊戲">
       <div class="hud">
         <div class="pill">剩餘包數：<b id="packCount">0</b></div>
         <div class="pill small">回合 <b id="roundCount">0</b></div>
+        <div class="pill small lucky-badge" title="幸運色"><span>🍀</span><img id="luckyImg" alt=""></div>
       </div>
 
       <div id="board" class="board" role="grid" aria-label="3x3 九宮格"></div>
@@ -37,20 +43,33 @@
       <button id="cashOutBtn" class="btn secondary" type="button">結算</button>
     </section>
 
-    <!-- 結果畫面 -->
     <section id="resultScreen" class="screen" aria-label="結果">
-      <h2 class="heading">包數用完了！</h2>
+      <h2 class="heading" id="resultTitle">本局結算</h2>
       <div class="result-card">
-        <div class="row"><span>起始包數</span><b id="resStart">0</b></div>
-        <div class="row"><span>包數變化</span><b id="resGained">0</b></div>
-        <div class="row"><span>回合數</span><b id="resRounds">0</b></div>
-        <div class="row"><span>歷史最高回合</span><b id="resBest">0</b></div>
+        <div class="row big"><span>本局獲得</span><b id="resGained">0</b></div>
+        <div class="row"><span>起始 → 最終包數</span><b id="resPacks">0</b></div>
+        <div class="row"><span>回合 / 開包數</span><b id="resRounds">0</b></div>
+        <div class="row"><span>碰 / 連線</span><b id="resMatches">0</b></div>
+        <div class="row"><span>全家福 / 幸運色</span><b id="resBonus">0</b></div>
       </div>
-      <button id="againBtn" class="btn primary" type="button">再玩一次</button>
+      <div id="resAch" class="res-ach hidden"></div>
+      <div class="menu-row">
+        <button id="againBtn" class="btn primary" type="button">再玩一次</button>
+        <button id="resAchBtn" class="btn secondary" type="button">🏆 成就</button>
+      </div>
+    </section>
+
+    <section id="achScreen" class="screen scroll" aria-label="成就">
+      <h2 class="heading" id="achTitle">成就</h2>
+      <div class="account hidden"></div>
+      <div id="achList" class="ach-list"></div>
     </section>
   </main>
 
+  <script src="firebase-config.js"></script>
   <script src="logic.js"></script>
+  <script src="progress.js"></script>
+  <script src="cloud.js"></script>
   <script src="game.js"></script>
 </body>
 </html>
