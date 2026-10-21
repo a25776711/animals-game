@@ -57,6 +57,7 @@
           img.src = app.COLORS[card.color].img;
           img.alt = app.COLORS[card.color].name + '龜';
           front.appendChild(img);
+          front.appendChild(el('small', 'color-label', app.COLORS[card.color].name));
           b.appendChild(back);
           b.appendChild(front);
           b.addEventListener('click', function () { flip(i); });

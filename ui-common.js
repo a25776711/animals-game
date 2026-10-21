@@ -1,6 +1,15 @@
 (function (root) {
   'use strict';
 
+  function icon(name, cls) {
+    var img = document.createElement('img');
+    img.className = cls || 'ink-icon';
+    img.src = 'img/ink-' + name + '.svg';
+    img.alt = '';
+    img.setAttribute('aria-hidden', 'true');
+    return img;
+  }
+
   var CHIPS = [10, 50, 100, 500];
 
   function betBox(app, opts) {
@@ -30,5 +39,5 @@
     return Math.max(min, Math.min(bet, max, Math.max(min, turtles)));
   }
 
-  root.TurtleUICommon = { betBox: betBox, clampBet: clampBet };
+  root.TurtleUICommon = { icon: icon, betBox: betBox, clampBet: clampBet };
 })(window);

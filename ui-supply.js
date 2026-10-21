@@ -4,7 +4,7 @@
   var E = root.TurtleEconomy;
   var R = root.TurtleRng;
 
-  var PALETTE = ['#ffd9a8', '#c9e8cf', '#cfe3f7', '#f8cfd8'];
+  var PALETTE = ['#dfc576', '#aebd96', '#c6d1c7', '#dba48b'];
   var SPIN_TURNS = 5;
 
   function pad(n) { return n < 10 ? '0' + n : String(n); }
@@ -122,7 +122,7 @@
       function finish() {
         if (finished) return;
         finished = true;
-        result.textContent = '🎉 +' + amount + ' 錢';
+        result.textContent = '+' + amount + ' 錢';
         done.disabled = false;
         done.focus();
         render();

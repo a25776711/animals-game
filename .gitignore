@@ -25,3 +25,6 @@ ProjectSettings/
 *.pidb
 *.pdb
 *.mdb
+
+# 給 GPT 的風格說明（自己產生，不上傳）
+STYLE-BRIEF.md

@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, user-scalable=no">
-  <meta name="theme-color" content="#ffe6d1">
+  <meta name="theme-color" content="#eeeadd">
   <title>wū guī 對對碰</title>
   <script>
     (function () {
@@ -19,29 +19,42 @@
 </head>
 <body>
   <main id="app">
+    <div class="masthead" aria-hidden="true"><span>池畔遊戲社</span><span>WŪ GUĪ CLUB / 01</span></div>
     <button id="backBtn" class="btn back hidden" type="button">← 返回</button>
-    <button id="settingsBtn" class="btn corner" type="button" aria-label="設定" title="設定">⚙️</button>
+    <button id="settingsBtn" class="btn corner" type="button" aria-label="設定" title="設定">設定</button>
     <div id="toasts" class="toasts" aria-live="polite"></div>
 
     <section id="titleScreen" class="screen active" aria-label="標題">
-      <h1 class="logo"><span>wū guī</span> <span>對對碰</span></h1>
-      <p class="tap-hint">點擊畫面開始</p>
+      <div class="cover-copy">
+        <p class="eyebrow">池畔遊戲社 · 一盒慢慢玩的好時光</p>
+        <h1 class="logo"><span>wū guī</span><span>對對碰</span></h1>
+        <p class="cover-note">九種顏色，碰在一起。<br>開一包，看看今天的好運。</p>
+        <button class="btn primary tap-hint" type="button">開始一局 <span aria-hidden="true">↗</span></button>
+      </div>
+      <div class="cover-art" aria-hidden="true">
+        <span class="pond-ring"></span>
+        <img class="cover-turtle one" src="img/turtle-green.png" alt="">
+        <img class="cover-turtle two" src="img/turtle-amber.png" alt="">
+        <img class="cover-turtle three" src="img/turtle-lightblue.png" alt="">
+        <span class="art-stamp">慢慢玩<br>就很好</span>
+        <span class="art-caption">圖版 01 — 池邊的小夥伴</span>
+      </div>
       <div class="wallet-row" data-kinds="money,turtles"></div>
       <div class="menu-row">
-        <button id="supplyBtn" class="btn secondary" type="button">🎁 補給<i id="supplyDot" class="dot hidden"></i></button>
-        <button id="hubBtn" class="btn secondary" type="button">🎮 烏龜廣場</button>
-        <button id="achBtn" class="btn secondary" type="button">🏆 成就</button>
+        <button id="supplyBtn" class="btn secondary" type="button"><img class="ink-icon" src="img/ink-supply.svg" alt="">補給<i id="supplyDot" class="dot hidden"></i></button>
+        <button id="hubBtn" class="btn secondary" type="button"><img class="ink-icon" src="img/ink-pet.svg" alt="">烏龜廣場</button>
+        <button id="achBtn" class="btn secondary" type="button"><img class="ink-icon" src="img/ink-award.svg" alt="">成就</button>
       </div>
       <div class="account hidden"></div>
     </section>
 
     <section id="startScreen" class="screen" aria-label="開局設定">
       <div class="wallet-row" data-kinds="money"></div>
-      <h2 class="heading">選擇幸運色</h2>
+      <div class="config-col"><p class="eyebrow">01 / 挑一位幸運夥伴</p><h2 class="heading">選擇幸運色</h2>
       <div id="luckyPicker" class="lucky-picker" role="radiogroup" aria-label="幸運色"></div>
-      <h2 class="heading sub">選擇起始包數</h2>
+      </div><div class="config-col"><p class="eyebrow">02 / 準備出發</p><h2 class="heading sub">選擇起始包數</h2>
       <div id="packOptions" class="pack-list" role="list"></div>
-      <p id="startNote" class="rules"></p>
+      <p id="startNote" class="rules"></p></div>
     </section>
 
     <section id="playScreen" class="screen" aria-label="遊戲">
@@ -49,7 +62,7 @@
       <div class="hud">
         <div class="pill">剩餘包數：<b id="packCount">0</b></div>
         <div class="pill small">回合 <b id="roundCount">0</b></div>
-        <div class="pill small lucky-badge" title="幸運色"><span>🍀</span><img id="luckyImg" alt=""></div>
+        <div class="pill small lucky-badge" title="幸運色"><span>幸運色</span><img id="luckyImg" alt=""></div>
       </div>
 
       <div id="board" class="board" role="grid" aria-label="3x3 九宮格"></div>
@@ -72,8 +85,8 @@
       <div id="resAch" class="res-ach hidden"></div>
       <div class="menu-row">
         <button id="againBtn" class="btn primary" type="button">再玩一次</button>
-        <button id="resHubBtn" class="btn secondary" type="button">🎮 烏龜廣場</button>
-        <button id="resAchBtn" class="btn secondary" type="button">🏆 成就</button>
+        <button id="resHubBtn" class="btn secondary" type="button">烏龜廣場</button>
+        <button id="resAchBtn" class="btn secondary" type="button">成就</button>
       </div>
     </section>
 

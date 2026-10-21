@@ -4,26 +4,16 @@
   var Shop = root.TurtleShop;
   var P = root.TurtleProgress;
 
-  var SKIN_COLORS = {
-    default: ['#fffaee', '#ffe6d1'],
-    sakura: ['#fff0f5', '#ffd6e3'],
-    mint: ['#f0fff6', '#cdf2dd'],
-    sunset: ['#fff3e0', '#ffc9a3'],
-    ocean: ['#eaf6ff', '#bfe0f7'],
-    galaxy: ['#efe9ff', '#cfc2f5']
-  };
-
   function create(app) {
     var screen = document.getElementById('shopScreen');
     var tab = 'theme';
 
     function preview(item) {
       var el = app.el;
-      if (item.type === 'hat') return el('div', 'shop-preview hat', item.emoji);
+      if (item.type === 'hat') return root.TurtleUICommon.icon(item.id.replace('hat-', ''), 'shop-preview hat');
       if (item.type === 'theme') {
-        var c = SKIN_COLORS[item.skin];
         var sw = el('div', 'shop-preview theme');
-        sw.style.background = 'linear-gradient(to bottom, ' + c[0] + ', ' + c[1] + ')';
+        sw.setAttribute('data-skin', item.skin);
         return sw;
       }
       var b = el('div', 'shop-preview board-preview');

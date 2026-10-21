@@ -63,7 +63,7 @@
       img.alt = pet.name;
       body.appendChild(img);
       var hat = pet.accessory && Shop.find(pet.accessory);
-      if (hat && hat.emoji) body.appendChild(el('span', 'pet-hat', hat.emoji));
+      if (hat && hat.emoji) body.appendChild(root.TurtleUICommon.icon(hat.id.replace('hat-', ''), 'pet-hat'));
       scale.appendChild(body);
       box.appendChild(scale);
       if (bubble) box.appendChild(el('div', 'pet-bubble', bubble));
@@ -94,7 +94,7 @@
 
       var meters = el('div', 'meters');
       meters.appendChild(meter('經驗', info.into, info.need, 'xp'));
-      meters.appendChild(meter('飽足度 ' + mood.face + ' ' + mood.text, fullness, 100, fullness < 40 ? 'low' : ''));
+      meters.appendChild(meter('飽足度 · ' + mood.text, fullness, 100, fullness < 40 ? 'low' : ''));
       screen.appendChild(meters);
 
       var feed = el('button', 'btn primary', '餵食（-' + cost + ' 隻烏龜）');
@@ -119,6 +119,7 @@
         im.src = c.img;
         im.alt = '';
         b.appendChild(im);
+        b.appendChild(el('small', 'color-label', c.name));
         b.addEventListener('click', function () {
           Pet.setColor(p, c.id, Date.now());
           app.save();
@@ -142,7 +143,7 @@
         none.addEventListener('click', function () { Shop.removeHat(p, Date.now()); app.save(); render(); });
         seg.appendChild(none);
         hats.forEach(function (h) {
-          var b = el('button', null, h.emoji + ' ' + h.name);
+          var b = el('button', null, h.name);
           b.type = 'button';
           b.setAttribute('role', 'radio');
           b.setAttribute('aria-checked', String(pet.accessory === h.id));
@@ -151,7 +152,7 @@
         });
         screen.appendChild(seg);
       }
-      var go = el('button', 'btn secondary', '🛍️ 去裝飾商店');
+      var go = el('button', 'btn secondary', '去裝飾商店');
       go.type = 'button';
       go.addEventListener('click', function () { app.open('shop'); });
       screen.appendChild(go);
@@ -169,7 +170,7 @@
       app.save();
       app.notify(r.unlocked);
       say(r.leveledUp ? '我長大了！' : '好吃！');
-      if (r.leveledUp) app.toastText('🎉 ' + p.pet.name + ' 升到 Lv.' + r.level);
+      if (r.leveledUp) app.toastText(p.pet.name + ' 升到 Lv.' + r.level);
       render();
     }
 

@@ -147,7 +147,7 @@
       state.result = {
         won: won,
         text: won
-          ? '🎉 ' + winName + '贏了！押中 ×' + odds.toFixed(1) + '，拿回 ' + app.fmt(payout) + '（淨賺 ' + app.fmt(payout - bet) + '）'
+          ? winName + '贏了！押中 ×' + odds.toFixed(1) + '，拿回 ' + app.fmt(payout) + '（淨賺 ' + app.fmt(payout - bet) + '）'
           : winName + '贏了，你押的' + pickName + '第 ' + (order.indexOf(pick) + 1) + ' 名，輸了 ' + app.fmt(bet)
       };
       app.setBusy(false);

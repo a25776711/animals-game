@@ -24,12 +24,12 @@
     { packs: 50, hint: '約 30 回合' }
   ];
   var HUB_GAMES = [
-    { id: 'race', icon: '🏁', name: '烏龜賽跑', desc: '押一隻烏龜，賠率最高 16 倍' },
-    { id: 'bj', icon: '🃏', name: '21 點', desc: '跟莊家比點數，Blackjack 賠 6:5' },
-    { id: 'mem', icon: '🧠', name: '翻牌記憶', desc: '報名 50 隻烏龜，步數越少獎勵越多' },
-    { id: 'gacha', icon: '🎰', name: '抽卡圖鑑', desc: '抽 4 種稀有度的烏龜卡，集滿 36 種' },
-    { id: 'pet', icon: '🐣', name: '養龜', desc: '餵小龜長大，替牠換顏色、戴帽子' },
-    { id: 'shop', icon: '🛍️', name: '裝飾商店', desc: '買背景、棋盤花紋和小龜的配件' }
+    { id: 'race', name: '烏龜賽跑', desc: '押一隻烏龜，賠率最高 16 倍' },
+    { id: 'bj', name: '21 點', desc: '跟莊家比點數，Blackjack 賠 6:5' },
+    { id: 'mem', name: '翻牌記憶', desc: '報名 50 隻烏龜，步數越少獎勵越多' },
+    { id: 'gacha', name: '抽卡圖鑑', desc: '抽 4 種稀有度的烏龜卡，集滿 36 種' },
+    { id: 'pet', name: '養龜', desc: '餵小龜長大，替牠換顏色、戴帽子' },
+    { id: 'shop', name: '裝飾商店', desc: '買背景、棋盤花紋和小龜的配件' }
   ];
   var BACK = { start: 'title', hub: 'title', supply: 'title', race: 'hub', bj: 'hub', mem: 'hub', gacha: 'hub', pet: 'hub', shop: 'hub' };
 
@@ -99,7 +99,7 @@
   }
 
   function toast(def) {
-    toastText('🏆 解鎖成就：' + def.icon + ' ' + def.name);
+    toastText('解鎖成就：' + def.name);
   }
 
   function notify(unlocked) {
@@ -212,7 +212,7 @@
       var btn = el('button', 'btn');
       btn.type = 'button';
       if (account) {
-        status.textContent = '☁ ' + account.name + (syncText ? '・' + syncText : '');
+        status.textContent = account.name + (syncText ? '・' + syncText : '');
         btn.textContent = '登出';
         btn.addEventListener('click', onSignOut);
       } else {
@@ -333,7 +333,7 @@
 
   function giftDialog() {
     var m = openModal({ label: '首次登入禮' });
-    m.card.appendChild(el('h3', null, '🎁 首次登入禮'));
+    m.card.appendChild(el('h3', null, '首次登入禮'));
     m.card.appendChild(el('p', null, '歡迎！送你 ' + E.CFG.firstLoginMoney + ' 錢，可以玩 ' + (E.CFG.firstLoginMoney / 50) + ' 次 50 包。'));
     var ok = el('button', 'btn choice merge', '太好了');
     ok.type = 'button';
@@ -421,6 +421,7 @@
     img.src = COLORS[color].img;
     img.alt = COLORS[color].name + '色烏龜';
     c.appendChild(img);
+    c.appendChild(el('small', 'color-label', COLORS[color].name));
     if (cls) c.classList.add(cls);
   }
 
@@ -468,7 +469,7 @@
         bar.appendChild(fill);
         body.appendChild(bar);
       }
-      card.appendChild(el('div', 'ach-icon', d.icon));
+      card.appendChild(window.TurtleUICommon.icon('award', 'ach-icon'));
       card.appendChild(body);
       list.appendChild(card);
     });
@@ -558,7 +559,7 @@
         renderHud();
         record('lucky');
         saveSession();
-        announce('🍀 幸運色！+1 包', 'lucky');
+        announce('幸運色！+1 包', 'lucky');
         await Promise.all([wait(MS.lucky), Sound.play('lucky')]);
       }
     }
@@ -629,9 +630,9 @@
     resAch.innerHTML = '';
     resAch.classList.toggle('hidden', !game.unlocked.length);
     if (game.unlocked.length) {
-      resAch.appendChild(el('b', null, '🏆 本局解鎖成就'));
+      resAch.appendChild(el('b', null, '本局解鎖成就'));
       game.unlocked.forEach(function (d) {
-        resAch.appendChild(el('div', null, d.icon + ' ' + d.name + '：' + d.desc));
+        resAch.appendChild(el('div', null, d.name + '：' + d.desc));
       });
     }
 
@@ -667,6 +668,7 @@
       img.src = c.img;
       img.alt = '';
       b.appendChild(img);
+      b.appendChild(el('small', 'color-label', c.name));
       b.addEventListener('click', function () {
         lucky = c.id;
         try { localStorage.setItem(LUCKY_KEY, String(lucky)); } catch (e) {}
@@ -693,7 +695,7 @@
       wrap.appendChild(b);
       packRows.push({ el: b, packs: o.packs });
     });
-    startSupplyBtn = el('button', 'btn secondary hidden', '🎁 去補給站');
+    startSupplyBtn = el('button', 'btn secondary hidden', '去補給站');
     startSupplyBtn.type = 'button';
     startSupplyBtn.addEventListener('click', function () { ui.supply.open(); });
     screens.start.appendChild(startSupplyBtn);
@@ -720,7 +722,7 @@
   function applyTheme(t) {
     document.documentElement.setAttribute('data-theme', t);
     var meta = document.querySelector('meta[name="theme-color"]');
-    if (meta) meta.setAttribute('content', t === 'dark' ? '#181420' : '#ffe6d1');
+    if (meta) meta.setAttribute('content', t === 'dark' ? '#182920' : '#eeeadd');
   }
 
   function segmented(label, options, current, onPick) {
@@ -783,7 +785,7 @@
       function (id) { Sound.setVoiceSet(id).then(function () { Sound.play('pair'); }); }));
 
     card.appendChild(segmented('明暗',
-      [{ value: 'light', text: '☀️ 淺色' }, { value: 'dark', text: '🌙 深色' }],
+      [{ value: 'light', text: '淺色' }, { value: 'dark', text: '深色' }],
       document.documentElement.getAttribute('data-theme'),
       function (t) {
         applyTheme(t);
@@ -804,7 +806,8 @@
     HUB_GAMES.forEach(function (g) {
       var b = el('button', 'btn hub-card');
       b.type = 'button';
-      b.appendChild(el('div', 'hub-icon', g.icon));
+      b.appendChild(window.TurtleUICommon.icon(g.id, 'hub-icon'));
+      b.setAttribute('data-destination', g.id);
       var text = el('div');
       text.appendChild(el('b', null, g.name));
       text.appendChild(el('small', null, g.desc));
@@ -871,7 +874,7 @@
 
   if (E.grantStarter(profile)) {
     P.save(profile);
-    setTimeout(function () { toastText('🎁 新手禮：送你 ' + E.CFG.starterMoney + ' 錢'); }, 600);
+    setTimeout(function () { toastText('新手禮：送你 ' + E.CFG.starterMoney + ' 錢'); }, 600);
   }
   settleAbandoned();
 

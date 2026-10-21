@@ -81,7 +81,7 @@
       lastDraw = res.cards;
       app.save();
       app.notify(unlocked);
-      if (res.cards.some(function (c) { return c.rarity === 3; })) app.toastText('👑 抽到傳說烏龜！');
+      if (res.cards.some(function (c) { return c.rarity === 3; })) app.toastText('抽到傳說烏龜！');
       render();
     }
 
