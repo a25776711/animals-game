@@ -133,7 +133,7 @@ body {
   background: var(--pink);
 }
 
-.theme {
+.corner {
   position: absolute;
   top: max(16px, env(safe-area-inset-top));
   right: 16px;
@@ -145,8 +145,6 @@ body {
   line-height: 1;
   background: var(--gold);
 }
-
-.theme.mute { right: 76px; }
 
 .primary {
   padding: 20px 44px;
@@ -385,6 +383,24 @@ body {
 .choice.local { background: var(--blue); }
 .choice.cloud { background: var(--pink); }
 .linkbtn { appearance: none; border: 0; background: none; color: inherit; font: inherit; font-size: clamp(14px, 3.9vw, 16px); text-decoration: underline; opacity: 0.75; cursor: pointer; padding: 4px; }
+
+.setting { display: flex; flex-direction: column; gap: 8px; }
+.setting-head { display: flex; justify-content: space-between; align-items: baseline; font-weight: 700; font-size: clamp(16px, 4.6vw, 19px); }
+.setting-head span:last-child { font-weight: 500; opacity: 0.8; }
+.setting input[type="range"] { width: 100%; height: 32px; accent-color: var(--c-lucky); cursor: pointer; }
+.seg { display: grid; grid-auto-flow: column; grid-auto-columns: 1fr; gap: 8px; }
+.seg button {
+  appearance: none;
+  padding: 12px 8px;
+  border: 3px solid transparent;
+  border-radius: 14px;
+  background: var(--pill);
+  color: inherit;
+  font: inherit;
+  font-size: clamp(16px, 4.5vw, 19px);
+  cursor: pointer;
+}
+.seg button[aria-checked="true"] { border-color: var(--c-lucky); background: var(--green); font-weight: 700; }
 
 @media (max-height: 740px) {
   .screen { padding-top: 64px; gap: 10px; }

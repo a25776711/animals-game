@@ -536,23 +536,119 @@
     });
   }
 
-  function renderMute() {
-    var muteBtn = $('muteBtn');
-    var off = Sound.isMuted();
-    muteBtn.textContent = off ? '🔇' : '🔊';
-    muteBtn.setAttribute('aria-label', off ? '開啟語音' : '關閉語音');
-    muteBtn.title = off ? '開啟語音' : '關閉語音';
-  }
-
   function applyTheme(t) {
     document.documentElement.setAttribute('data-theme', t);
-    var label = t === 'dark' ? '切換為淺色模式' : '切換為深色模式';
-    var themeBtn = $('themeBtn');
-    themeBtn.textContent = t === 'dark' ? '☀️' : '🌙';
-    themeBtn.setAttribute('aria-label', label);
-    themeBtn.title = label;
     var meta = document.querySelector('meta[name="theme-color"]');
     if (meta) meta.setAttribute('content', t === 'dark' ? '#181420' : '#ffe6d1');
+  }
+
+  function segmented(label, options, current, onPick) {
+    var row = document.createElement('div');
+    row.className = 'setting';
+
+    var head = document.createElement('div');
+    head.className = 'setting-head';
+    var title = document.createElement('span');
+    title.textContent = label;
+    head.appendChild(title);
+
+    var seg = document.createElement('div');
+    seg.className = 'seg';
+    seg.setAttribute('role', 'radiogroup');
+    seg.setAttribute('aria-label', label);
+    options.forEach(function (o) {
+      var b = document.createElement('button');
+      b.type = 'button';
+      b.setAttribute('role', 'radio');
+      b.setAttribute('aria-checked', String(o.value === current));
+      b.textContent = o.text;
+      b.addEventListener('click', function () {
+        seg.querySelectorAll('button').forEach(function (x) { x.setAttribute('aria-checked', String(x === b)); });
+        onPick(o.value);
+      });
+      seg.appendChild(b);
+    });
+
+    row.appendChild(head);
+    row.appendChild(seg);
+    return row;
+  }
+
+  function openSettings() {
+    if (document.querySelector('.modal')) return;
+
+    var overlay = document.createElement('div');
+    overlay.className = 'modal';
+    overlay.setAttribute('role', 'dialog');
+    overlay.setAttribute('aria-modal', 'true');
+    overlay.setAttribute('aria-label', '設定');
+
+    var card = document.createElement('div');
+    card.className = 'modal-card';
+
+    var title = document.createElement('h3');
+    title.textContent = '設定';
+    card.appendChild(title);
+
+    var volume = document.createElement('div');
+    volume.className = 'setting';
+    var head = document.createElement('div');
+    head.className = 'setting-head';
+    var volLabel = document.createElement('span');
+    volLabel.textContent = '音量';
+    var volValue = document.createElement('span');
+    head.appendChild(volLabel);
+    head.appendChild(volValue);
+    var slider = document.createElement('input');
+    slider.type = 'range';
+    slider.min = '0';
+    slider.max = '100';
+    slider.step = '5';
+    slider.value = String(Math.round(Sound.getVolume() * 100));
+    slider.setAttribute('aria-label', '音量');
+    function showVolume() { volValue.textContent = Number(slider.value) === 0 ? '靜音' : slider.value + '%'; }
+    showVolume();
+    slider.addEventListener('input', function () {
+      Sound.setVolume(Number(slider.value) / 100);
+      showVolume();
+    });
+    slider.addEventListener('change', function () { Sound.play('pair'); });
+    volume.appendChild(head);
+    volume.appendChild(slider);
+    card.appendChild(volume);
+
+    card.appendChild(segmented('語音語種',
+      Sound.VOICE_SETS.map(function (s) { return { value: s.id, text: s.name }; }),
+      Sound.getVoiceSet(),
+      function (id) { Sound.setVoiceSet(id).then(function () { Sound.play('pair'); }); }));
+
+    card.appendChild(segmented('明暗',
+      [{ value: 'light', text: '☀️ 淺色' }, { value: 'dark', text: '🌙 深色' }],
+      document.documentElement.getAttribute('data-theme'),
+      function (t) {
+        applyTheme(t);
+        try { localStorage.setItem(THEME_KEY, t); } catch (e) {}
+      }));
+
+    var done = document.createElement('button');
+    done.type = 'button';
+    done.className = 'btn choice merge';
+    done.textContent = '完成';
+    card.appendChild(done);
+
+    function close() {
+      document.removeEventListener('keydown', onKey);
+      overlay.remove();
+      $('settingsBtn').focus();
+    }
+    function onKey(e) { if (e.key === 'Escape') close(); }
+    done.addEventListener('click', close);
+    overlay.addEventListener('click', function (e) { if (e.target === overlay) close(); });
+    document.addEventListener('keydown', onKey);
+
+    overlay.appendChild(card);
+    document.body.appendChild(overlay);
+    done.focus();
   }
 
   screens.title.addEventListener('click', function (e) {
@@ -564,15 +660,7 @@
   $('againBtn').addEventListener('click', function () { show('start'); });
   spinBtn.addEventListener('click', playRound);
   cashOutBtn.addEventListener('click', function () { if (!busy && game) finishGame(); });
-  $('muteBtn').addEventListener('click', function () {
-    Sound.setMuted(!Sound.isMuted());
-    renderMute();
-  });
-  $('themeBtn').addEventListener('click', function () {
-    var next = document.documentElement.getAttribute('data-theme') === 'dark' ? 'light' : 'dark';
-    applyTheme(next);
-    try { localStorage.setItem(THEME_KEY, next); } catch (e) {}
-  });
+  $('settingsBtn').addEventListener('click', openSettings);
   backBtn.addEventListener('click', function () {
     if (busy) return;
     if (phase === 'play') show('start');
@@ -583,6 +671,7 @@
   document.addEventListener('keydown', function (e) {
     if (e.key !== 'Enter' && e.key !== ' ') return;
     if (e.target.closest && e.target.closest('button')) return;
+    if (document.querySelector('.modal')) return;
     if (phase === 'title') show('start');
     else if (phase === 'play') { e.preventDefault(); playRound(); }
   });
@@ -590,7 +679,6 @@
 
   COLORS.forEach(function (c) { new Image().src = c.img; });
   applyTheme(document.documentElement.getAttribute('data-theme') || 'light');
-  renderMute();
   buildLuckyPicker();
   buildPackButtons();
   renderAccount();
