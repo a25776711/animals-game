@@ -146,6 +146,8 @@ body {
   background: var(--gold);
 }
 
+.theme.mute { right: 76px; }
+
 .primary {
   padding: 20px 44px;
   font-size: clamp(26px, 7vw, 34px);

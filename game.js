@@ -4,6 +4,7 @@
   var L = window.TurtleLogic;
   var P = window.TurtleProgress;
   var Cloud = window.Cloud;
+  var Sound = window.TurtleSound;
 
   var COLORS = [
     { id: 0, name: '綠',   img: 'img/turtle-green.png' },
@@ -417,7 +418,7 @@
         renderHud();
         record('lucky');
         announce('🍀 幸運色！+1 包', 'lucky');
-        await wait(MS.lucky);
+        await Promise.all([wait(MS.lucky), Sound.play('lucky')]);
       }
     }
 
@@ -436,7 +437,7 @@
       if (ev.type !== 'family') label += '・' + COLORS[game.grid[ev.cells[0]]].name;
       ev.cells.forEach(function (c) { cells[c].classList.add('match'); });
       announce(label + '！+' + ev.packs + ' 包', ev.type);
-      await wait(MS.match);
+      await Promise.all([wait(MS.match), Sound.play(ev.type)]);
 
       ev.cells.forEach(function (c) { cells[c].classList.add('clearing'); });
       await wait(MS.clear);
@@ -535,6 +536,14 @@
     });
   }
 
+  function renderMute() {
+    var muteBtn = $('muteBtn');
+    var off = Sound.isMuted();
+    muteBtn.textContent = off ? '🔇' : '🔊';
+    muteBtn.setAttribute('aria-label', off ? '開啟語音' : '關閉語音');
+    muteBtn.title = off ? '開啟語音' : '關閉語音';
+  }
+
   function applyTheme(t) {
     document.documentElement.setAttribute('data-theme', t);
     var label = t === 'dark' ? '切換為淺色模式' : '切換為深色模式';
@@ -555,6 +564,10 @@
   $('againBtn').addEventListener('click', function () { show('start'); });
   spinBtn.addEventListener('click', playRound);
   cashOutBtn.addEventListener('click', function () { if (!busy && game) finishGame(); });
+  $('muteBtn').addEventListener('click', function () {
+    Sound.setMuted(!Sound.isMuted());
+    renderMute();
+  });
   $('themeBtn').addEventListener('click', function () {
     var next = document.documentElement.getAttribute('data-theme') === 'dark' ? 'light' : 'dark';
     applyTheme(next);
@@ -577,6 +590,7 @@
 
   COLORS.forEach(function (c) { new Image().src = c.img; });
   applyTheme(document.documentElement.getAttribute('data-theme') || 'light');
+  renderMute();
   buildLuckyPicker();
   buildPackButtons();
   renderAccount();
