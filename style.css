@@ -1,4 +1,4 @@
-/* WU GUI CLUB — paper game box. No filters on turtle artwork. */
+/* Paper game box. No filters on turtle artwork. */
 :root {
   color-scheme: light;
   --paper: #eeeadd; --panel: #f7f4e9; --ink: #263e32; --muted: #656e60;
@@ -37,9 +37,6 @@ img { max-width: 100%; }
 button img { pointer-events: none; }
 .hidden { display: none !important; }
 #app { height: 100%; max-width: 1180px; margin: auto; position: relative; }
-.masthead { position: absolute; top: max(20px, env(safe-area-inset-top)); left: 24px; right: 24px; display: flex; justify-content: space-between; border-bottom: 1px solid var(--ink); padding-bottom: 12px; font-size: 11px; letter-spacing: .17em; pointer-events: none; }
-.masthead span:first-child { margin-left: 95px; }
-.masthead span:last-child { margin-right: 62px; }
 .screen { position: absolute; inset: 67px 0 0; display: none; overflow-y: auto; overflow-x: hidden; padding: 26px 24px max(32px, env(safe-area-inset-bottom)); scrollbar-width: thin; scrollbar-color: var(--line) transparent; }
 .screen.active { display: flex; flex-direction: column; align-items: stretch; gap: 20px; }
 .screen > * { flex-shrink: 0; min-width: 0; }
@@ -47,7 +44,6 @@ p, h1, h2, h3, h4 { margin: 0; }
 .heading { font: 700 clamp(30px, 4vw, 46px)/1.3 var(--serif); letter-spacing: .04em; }
 .heading.sub { font-size: 28px; }
 .section-title { font: 700 22px/1.4 var(--serif); border-top: 1px solid var(--line); padding-top: 20px; }
-.eyebrow { font-size: 11px; letter-spacing: .15em; color: var(--muted); }
 .rules, .ach-note, .game-note, .odds-table { font-size: 13px; line-height: 1.8; color: var(--muted); max-width: 720px; }
 .btn { appearance: none; border: 1px solid var(--ink); background: transparent; border-radius: 2px; padding: 10px 18px; min-height: 44px; font-weight: 600; transition: background-color .15s, color .15s; }
 .btn.primary { background: var(--accent); color: var(--accent-text); border-color: var(--accent); padding: 13px 25px; font-size: 20px; }
@@ -75,7 +71,6 @@ p, h1, h2, h3, h4 { margin: 0; }
 .logo { font: 900 clamp(60px, 8vw, 106px)/1.15 var(--serif); letter-spacing: -.04em; margin: 18px 0; }
 .logo span { display: block; }
 .logo span:first-child { font: italic 32px/1.3 Georgia, serif; letter-spacing: .08em; margin-bottom: 10px; }
-.cover-note { font-size: 14px; color: var(--muted); }
 .tap-hint { margin-top: 26px; display: flex; gap: 45px; align-items: center; }
 .cover-art { position: relative; min-height: 360px; border: 1px solid var(--line); background: var(--wash); overflow: hidden; }
 .pond-ring { position: absolute; inset: 12% -15%; border: 1px solid var(--ink); border-radius: 50%; transform: rotate(-32deg); opacity: .23; }
@@ -85,8 +80,6 @@ p, h1, h2, h3, h4 { margin: 0; }
 .cover-turtle.one { width: 49%; left: 6%; top: 12%; transform: rotate(-18deg); }
 .cover-turtle.two { width: 35%; right: 5%; top: 40%; transform: rotate(32deg); }
 .cover-turtle.three { width: 25%; left: 22%; bottom: 12%; transform: rotate(8deg); }
-.art-stamp { position: absolute; right: 18px; top: 18px; color: var(--accent); border: 2px solid; font: 700 15px/1.35 var(--serif); padding: 8px 6px; transform: rotate(7deg); }
-.art-caption { position: absolute; bottom: 10px; right: 14px; font-size: 10px; letter-spacing: .08em; color: var(--muted); }
 #titleScreen > .wallet-row { grid-column: 1 / -1; border-top: 1px solid var(--ink); padding-top: 16px; }
 #titleScreen > .menu-row { grid-column: 1 / -1; display: grid; grid-template-columns: repeat(3,1fr); }
 #titleScreen > .menu-row .btn { border: 0; border-bottom: 1px solid var(--line); justify-content: flex-start; padding-left: 0; }
@@ -296,15 +289,12 @@ p, h1, h2, h3, h4 { margin: 0; }
   #raceScreen, #bjScreen, #memScreen { padding-left: max(24px, calc((100% - 820px) / 2)); padding-right: max(24px, calc((100% - 820px) / 2)); }
 }
 @media (max-width:799px) {
-  .masthead { left: 20px; right: 20px; }
-  .masthead span:last-child { display: none; }
   .btn.back { left: 20px; } .btn.corner { right: 20px; }
   .screen { padding: 20px 20px max(28px, env(safe-area-inset-bottom)); gap: 18px; }
   #titleScreen.active { grid-template-columns: 1fr; gap: 20px; align-content: start; }
   .cover-copy { position: relative; }
   .logo { font-size: 66px; margin: 12px 0; }
   .logo span:first-child { font-size: 24px; margin-bottom: 5px; }
-  .cover-note { font-size: 12px; }
   .tap-hint { position: absolute; right: 0; bottom: 4px; padding: 10px 14px !important; font-size: 15px !important; gap: 16px; }
   .cover-art { min-height: 240px; }
   .cover-turtle.one { width: 43%; top: 6%; }
@@ -352,7 +342,6 @@ p, h1, h2, h3, h4 { margin: 0; }
   .screen { padding-left: 16px; padding-right: 16px; }
   .logo { font-size: 58px; }
   .tap-hint { gap: 8px; }
-  .cover-note { max-width: 170px; }
   .compare { gap: 8px; }
   .modal-card { padding: 18px; }
 }
@@ -370,3 +359,4 @@ p, h1, h2, h3, h4 { margin: 0; }
 @media (prefers-reduced-motion:reduce) {
   *, *::before, *::after { animation-duration: .01ms !important; animation-iteration-count: 1 !important; transition-duration: .01ms !important; scroll-behavior: auto !important; }
 }
+.donate-amounts { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; }

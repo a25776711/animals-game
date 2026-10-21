@@ -19,16 +19,13 @@
 </head>
 <body>
   <main id="app">
-    <div class="masthead" aria-hidden="true"><span>池畔遊戲社</span><span>WŪ GUĪ CLUB / 01</span></div>
     <button id="backBtn" class="btn back hidden" type="button">← 返回</button>
     <button id="settingsBtn" class="btn corner" type="button" aria-label="設定" title="設定">設定</button>
     <div id="toasts" class="toasts" aria-live="polite"></div>
 
     <section id="titleScreen" class="screen active" aria-label="標題">
       <div class="cover-copy">
-        <p class="eyebrow">池畔遊戲社 · 一盒慢慢玩的好時光</p>
         <h1 class="logo"><span>wū guī</span><span>對對碰</span></h1>
-        <p class="cover-note">九種顏色，碰在一起。<br>開一包，看看今天的好運。</p>
         <button class="btn primary tap-hint" type="button">開始一局 <span aria-hidden="true">↗</span></button>
       </div>
       <div class="cover-art" aria-hidden="true">
@@ -36,8 +33,6 @@
         <img class="cover-turtle one" src="img/turtle-green.png" alt="">
         <img class="cover-turtle two" src="img/turtle-amber.png" alt="">
         <img class="cover-turtle three" src="img/turtle-lightblue.png" alt="">
-        <span class="art-stamp">慢慢玩<br>就很好</span>
-        <span class="art-caption">圖版 01 — 池邊的小夥伴</span>
       </div>
       <div class="wallet-row" data-kinds="money,turtles"></div>
       <div class="menu-row">
@@ -46,13 +41,14 @@
         <button id="achBtn" class="btn secondary" type="button"><img class="ink-icon" src="img/ink-award.svg" alt="">成就</button>
       </div>
       <div class="account hidden"></div>
+      <button id="donateBtn" class="linkbtn hidden" type="button">請作者喝杯飲料</button>
     </section>
 
     <section id="startScreen" class="screen" aria-label="開局設定">
       <div class="wallet-row" data-kinds="money"></div>
-      <div class="config-col"><p class="eyebrow">01 / 挑一位幸運夥伴</p><h2 class="heading">選擇幸運色</h2>
+      <div class="config-col"><h2 class="heading">選擇幸運色</h2>
       <div id="luckyPicker" class="lucky-picker" role="radiogroup" aria-label="幸運色"></div>
-      </div><div class="config-col"><p class="eyebrow">02 / 準備出發</p><h2 class="heading sub">選擇起始包數</h2>
+      </div><div class="config-col"><h2 class="heading sub">選擇起始包數</h2>
       <div id="packOptions" class="pack-list" role="list"></div>
       <p id="startNote" class="rules"></p></div>
     </section>
@@ -115,6 +111,7 @@
   </main>
 
   <script src="firebase-config.js"></script>
+  <script src="donate-config.js"></script>
   <script src="rng.js"></script>
   <script src="logic.js"></script>
   <script src="progress.js"></script>
@@ -136,6 +133,7 @@
   <script src="ui-race.js"></script>
   <script src="ui-bj.js"></script>
   <script src="ui-mem.js"></script>
+  <script src="donate.js"></script>
   <script src="game.js"></script>
 </body>
 </html>
