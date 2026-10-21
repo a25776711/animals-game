@@ -85,6 +85,7 @@
       finished = false;
       summary = '';
       app.setBusy(true);
+      app.mood('memPlay');
       render();
     }
 
@@ -93,6 +94,7 @@
       lock = false;
       summary = { win: false, text: '放棄了，報名費不退' };
       app.setBusy(false);
+      app.mood(null);
       render();
     }
 
@@ -105,11 +107,13 @@
       var r = M.flip(game, i);
       if (r.type === 'ignore') return;
       setOpen(i, true);
+      app.fx('flip');
       if (r.type === 'first') return;
 
       stepsEl.textContent = '步數：' + game.moves;
       if (r.type === 'mismatch') {
         lock = true;
+        setTimeout(function () { app.fx('memMiss'); }, 380);
         setTimeout(function () {
           setOpen(r.a, false);
           setOpen(r.b, false);
@@ -119,6 +123,7 @@
       }
       buttons[r.a].classList.add('matched');
       buttons[r.b].classList.add('matched');
+      setTimeout(function () { app.fx('memMatch'); }, 300);
       if (r.type === 'win') win();
     }
 
@@ -135,6 +140,8 @@
         text: game.moves + ' 步完成，獎勵 ' + reward + '（' + (net >= 0 ? '淨賺 ' : '淨虧 ') + Math.abs(net) + '）'
       };
       app.setBusy(false);
+      app.mood(null);
+      setTimeout(function () { app.fx(net >= 0 ? 'bigWin' : 'win'); }, 600);
       app.save();
       app.notify(unlocked);
       setTimeout(function () {

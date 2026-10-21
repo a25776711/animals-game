@@ -12,6 +12,7 @@
   var BASE_TIME = 5.0;
   var RANK_GAP = 0.22;
   var RUNNER = 34;
+  var GUN_DELAY_MS = 900;
 
   function create(app) {
     var screen = document.getElementById('raceScreen');
@@ -110,7 +111,7 @@
       var runs = screen.querySelectorAll('.lane-run');
       var badged = {};
       var next = 1;
-      var t0 = performance.now();
+      var t0 = 0;
 
       function frame(now) {
         var t = (now - t0) / 1000;
@@ -120,6 +121,7 @@
           place(runners[lane], Math.max(0, Math.min(1, u + wobble)));
           if (u >= 1 && !badged[lane]) {
             badged[lane] = true;
+            app.fx('finish', next);
             var badge = app.el('span', 'rank-badge', String(next++));
             runs[lane].appendChild(badge);
           }
@@ -127,7 +129,14 @@
         if (t < last) requestAnimationFrame(frame);
         else settle(pick, bet, order);
       }
-      requestAnimationFrame(frame);
+      app.fx('ready');
+      setTimeout(function () { app.fx('ready'); }, 450);
+      setTimeout(function () {
+        app.fx('gun');
+        app.mood('raceGo');
+        t0 = performance.now();
+        requestAnimationFrame(frame);
+      }, GUN_DELAY_MS);
     }
 
     function settle(pick, bet, order) {
@@ -151,6 +160,8 @@
           : winName + '贏了，你押的' + pickName + '第 ' + (order.indexOf(pick) + 1) + ' 名，輸了 ' + app.fmt(bet)
       };
       app.setBusy(false);
+      app.mood(null);
+      app.fx(won ? 'bigWin' : 'lose');
       app.save();
       app.notify(unlocked);
       render();

@@ -17,6 +17,7 @@
   var buffers = {};
   var loading = Promise.resolve();
   var active = [];
+  var readyCallbacks = [];
 
   function store(key, value) {
     try { root.localStorage.setItem(key, value); } catch (e) {}
@@ -65,6 +66,7 @@
     gain.gain.value = volume;
     gain.connect(ctx.destination);
     loading = loadSet(voiceSet);
+    readyCallbacks.splice(0).forEach(function (fn) { fn(); });
     var silent = ctx.createBufferSource();
     silent.buffer = ctx.createBuffer(1, 1, 22050);
     silent.connect(ctx.destination);
@@ -107,6 +109,7 @@
           active.push(src);
           setTimeout(finish, MAX_WAIT_MS);
           src.start(0);
+          if (root.TurtleFx) root.TurtleFx.duck(2);
         });
       }, function () { return null; });
     });
@@ -117,6 +120,7 @@
     store(VOLUME_KEY, String(volume));
     if (gain) gain.gain.value = volume;
     if (volume === 0) stopAll();
+    if (root.TurtleFx) root.TurtleFx.refresh();
   }
 
   function setVoiceSet(id) {
@@ -132,6 +136,8 @@
   root.TurtleSound = {
     VOICE_SETS: VOICE_SETS,
     play: play,
+    audio: function () { return ctx ? { ctx: ctx, out: gain } : null; },
+    onReady: function (fn) { if (ctx) fn(); else readyCallbacks.push(fn); },
     setVolume: setVolume,
     getVolume: function () { return volume; },
     setVoiceSet: setVoiceSet,

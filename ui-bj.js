@@ -116,10 +116,12 @@
       game = B.start(shoe, bet);
       shown = 0;
       message = { text: '', kind: '' };
+      for (var d = 0; d < 4; d++) setTimeout(function () { app.fx('deal'); }, d * 140);
       if (game.stage === 'done') {
         finishHand(true);
       } else {
         app.setBusy(true);
+        app.mood('bjPlay');
         render();
       }
     }
@@ -130,8 +132,10 @@
       if (kind === 'double') {
         if (!B.canDouble(game) || !E.spendTurtles(p, game.bet, Date.now())) return;
         app.save();
+        app.fx('deal');
         B.double(game);
       } else if (kind === 'hit') {
+        app.fx('deal');
         B.hit(game);
       } else {
         B.stand(game);
@@ -146,10 +150,12 @@
       render();
       if (!instant) {
         shown = 2;
+        app.fx('flip');
         render();
         await wait(REVEAL_MS);
         for (var n = 3; n <= game.dealer.length; n++) {
           shown = n;
+          app.fx('deal');
           render();
           await wait(REVEAL_MS);
         }
@@ -172,6 +178,8 @@
 
       animating = false;
       app.setBusy(false);
+      app.mood(null);
+      app.fx(game.outcome === 'blackjack' ? 'bigWin' : game.outcome === 'win' ? 'win' : game.outcome === 'push' ? 'push' : 'lose');
       app.save();
       app.notify(unlocked);
       render();

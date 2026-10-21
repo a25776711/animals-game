@@ -84,8 +84,29 @@
       app.save();
       app.notify(r.unlocked);
       if (mode === 'wheel') wheelModal(r.wheelIndex, r.amount);
-      else app.toastText('+' + r.amount + ' 錢');
+      else {
+        app.fx('coin');
+        app.toastText('+' + r.amount + ' 錢', true);
+      }
       render();
+    }
+
+    function tickWheel(wheel, seg, isDone) {
+      var last = -1;
+      var lastAt = 0;
+      function frame(now) {
+        if (isDone()) return;
+        var m = new DOMMatrixReadOnly(getComputedStyle(wheel).transform);
+        var angle = ((Math.atan2(m.b, m.a) * 180 / Math.PI) + 360) % 360;
+        var slot = Math.floor(angle / seg);
+        if (last >= 0 && slot !== last && now - lastAt > 45) {
+          app.fx('wheelTick');
+          lastAt = now;
+        }
+        last = slot;
+        requestAnimationFrame(frame);
+      }
+      requestAnimationFrame(frame);
     }
 
     function wheelModal(index, amount) {
@@ -122,6 +143,7 @@
       function finish() {
         if (finished) return;
         finished = true;
+        app.fx(amount >= 250 ? 'bigWin' : 'coin');
         result.textContent = '+' + amount + ' 錢';
         done.disabled = false;
         done.focus();
@@ -135,7 +157,10 @@
       wheel.addEventListener('transitionend', finish);
       setTimeout(finish, 5200);
       requestAnimationFrame(function () {
-        requestAnimationFrame(function () { wheel.style.transform = 'rotate(' + target + 'deg)'; });
+        requestAnimationFrame(function () {
+          wheel.style.transform = 'rotate(' + target + 'deg)';
+          if (!reduce) tickWheel(wheel, seg, function () { return finished; });
+        });
       });
     }
 

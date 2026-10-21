@@ -356,6 +356,17 @@ p, h1, h2, h3, h4 { margin: 0; }
   .compare { gap: 8px; }
   .modal-card { padding: 18px; }
 }
+.nudge { animation: nudge 1.3s ease-in-out 3; }
+@keyframes nudge {
+  0%, 100% { transform: none; }
+  20% { transform: translateY(-4px) rotate(-1.2deg); }
+  45% { transform: translateY(0) rotate(1.2deg); }
+  65% { transform: translateY(-2px); }
+}
+.dot:not(.hidden) { animation: dotPulse 1.8s ease-in-out infinite; }
+@keyframes dotPulse { 50% { transform: scale(1.5); opacity: .55; } }
+.hub-card .hub-dot { top: 12px; right: 46px; }
+
 @media (prefers-reduced-motion:reduce) {
   *, *::before, *::after { animation-duration: .01ms !important; animation-iteration-count: 1 !important; transition-duration: .01ms !important; scroll-behavior: auto !important; }
 }

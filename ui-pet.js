@@ -71,6 +71,7 @@
         body.classList.remove('bounce');
         void body.offsetWidth;
         body.classList.add('bounce');
+        app.fx('pat');
         say(fullness >= 40 ? '嘿嘿～' : '肚子餓了…');
         var b = box.querySelector('.pet-bubble');
         if (!b) {
@@ -169,8 +170,12 @@
       }
       app.save();
       app.notify(r.unlocked);
+      app.fx('feed');
       say(r.leveledUp ? '我長大了！' : '好吃！');
-      if (r.leveledUp) app.toastText(p.pet.name + ' 升到 Lv.' + r.level);
+      if (r.leveledUp) {
+        setTimeout(function () { app.fx('levelUp'); }, 450);
+        app.toastText(p.pet.name + ' 升到 Lv.' + r.level, true);
+      }
       render();
     }
 

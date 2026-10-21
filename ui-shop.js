@@ -34,6 +34,7 @@
         b.classList.add('equip');
         b.addEventListener('click', function () {
           Shop.equip(p, item.id, Date.now());
+          app.fx('equip');
           app.applySkin();
           app.save();
           render();
@@ -104,7 +105,8 @@
         } else {
           app.save();
           app.notify(r.unlocked);
-          app.toastText('買到了：' + item.name);
+          app.fx('buy');
+          app.toastText('買到了：' + item.name, true);
         }
         render();
       });

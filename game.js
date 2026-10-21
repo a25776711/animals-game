@@ -6,6 +6,7 @@
   var E = window.TurtleEconomy;
   var Cloud = window.Cloud;
   var Sound = window.TurtleSound;
+  var Fx = window.TurtleFx;
 
   var COLORS = [
     { id: 0, name: '綠',   img: 'img/turtle-green.png' },
@@ -90,16 +91,20 @@
 
   function fmt(n) { return Number(n).toLocaleString('en-US'); }
 
+  function fx(name, a, b) { if (Fx) Fx.play(name, a, b); }
+
   /* 通用元件 */
 
-  function toastText(text) {
+  function toastText(text, silent) {
     var t = el('div', 'toast', text);
     $('toasts').appendChild(t);
+    if (!silent) fx('toast');
     setTimeout(function () { t.remove(); }, 3400);
   }
 
   function toast(def) {
-    toastText('解鎖成就：' + def.name);
+    toastText('解鎖成就：' + def.name, true);
+    fx('unlock');
   }
 
   function notify(unlocked) {
@@ -126,6 +131,7 @@
     if (!opts.locked) overlay.addEventListener('click', function (e) { if (e.target === overlay) close(); });
     document.addEventListener('keydown', onKey);
     document.body.appendChild(overlay);
+    fx('open');
     return { card: card, close: close };
   }
 
@@ -185,7 +191,11 @@
     backBtn.classList.toggle('hidden', name === 'title' || name === 'result');
     if (name === 'ach') renderAchievements();
     if (name === 'title') updateSupplyDot();
+    if (name === 'hub') updateHubDots();
     refreshWallets();
+    if (Fx) Fx.scene(name);
+    fx(name === 'shop' ? 'shopBell' : 'nav');
+    armHint();
   }
 
   function record(kind, data) {
@@ -428,6 +438,7 @@
   function renderHud() {
     $('packCount').textContent = game.packs;
     $('roundCount').textContent = game.rounds;
+    if (Fx && phase === 'play') Fx.mood(!game.finished && game.packs > 0 && game.packs <= 5 ? 'playLow' : null);
   }
 
   function updateSpinLabel() {
@@ -545,6 +556,7 @@
       game.opened++;
       game.grid[i] = color;
       renderCell(i, color, 'pop');
+      fx('pop', k);
       renderHud();
       record('open');
       saveSession();
@@ -560,6 +572,7 @@
         record('lucky');
         saveSession();
         announce('幸運色！+1 包', 'lucky');
+        fx('lucky');
         await Promise.all([wait(MS.lucky), Sound.play('lucky')]);
       }
     }
@@ -579,9 +592,11 @@
       if (ev.type !== 'family') label += '・' + COLORS[game.grid[ev.cells[0]]].name;
       ev.cells.forEach(function (c) { cells[c].classList.add('match'); });
       announce(label + '！+' + ev.packs + ' 包', ev.type);
+      fx(ev.type);
       await Promise.all([wait(MS.match), Sound.play(ev.type)]);
 
       ev.cells.forEach(function (c) { cells[c].classList.add('clearing'); });
+      fx('clear');
       await wait(MS.clear);
 
       ev.cells.forEach(function (c) { game.grid[c] = null; renderCell(c, null); });
@@ -636,6 +651,7 @@
       });
     }
 
+    fx(game.rounds > 0 ? 'win' : 'push');
     setTimeout(function () { show('result'); }, 600);
   }
 
@@ -750,34 +766,39 @@
     return row;
   }
 
+  function volumeRow(label, get, set, preview) {
+    var row = el('div', 'setting');
+    var head = el('div', 'setting-head');
+    head.appendChild(el('span', null, label));
+    var value = el('span');
+    head.appendChild(value);
+    var slider = el('input');
+    slider.type = 'range';
+    slider.min = '0';
+    slider.max = '100';
+    slider.step = '5';
+    slider.value = String(Math.round(get() * 100));
+    slider.setAttribute('aria-label', label);
+    function showValue() { value.textContent = Number(slider.value) === 0 ? '靜音' : slider.value + '%'; }
+    showValue();
+    slider.addEventListener('input', function () { set(Number(slider.value) / 100); showValue(); });
+    slider.addEventListener('change', preview);
+    row.appendChild(head);
+    row.appendChild(slider);
+    return row;
+  }
+
   function openSettings() {
     if (document.querySelector('.modal')) return;
     var m = openModal({ label: '設定', onClose: function () { $('settingsBtn').focus(); } });
     var card = m.card;
     card.appendChild(el('h3', null, '設定'));
 
-    var volume = el('div', 'setting');
-    var head = el('div', 'setting-head');
-    head.appendChild(el('span', null, '音量'));
-    var volValue = el('span');
-    head.appendChild(volValue);
-    var slider = el('input');
-    slider.type = 'range';
-    slider.min = '0';
-    slider.max = '100';
-    slider.step = '5';
-    slider.value = String(Math.round(Sound.getVolume() * 100));
-    slider.setAttribute('aria-label', '音量');
-    function showVolume() { volValue.textContent = Number(slider.value) === 0 ? '靜音' : slider.value + '%'; }
-    showVolume();
-    slider.addEventListener('input', function () {
-      Sound.setVolume(Number(slider.value) / 100);
-      showVolume();
-    });
-    slider.addEventListener('change', function () { Sound.play('pair'); });
-    volume.appendChild(head);
-    volume.appendChild(slider);
-    card.appendChild(volume);
+    card.appendChild(volumeRow('總音量', Sound.getVolume, Sound.setVolume, function () { Sound.play('pair'); }));
+    if (Fx) {
+      card.appendChild(volumeRow('音效', Fx.getSfxVolume, Fx.setSfxVolume, function () { Fx.play('pop', 3); }));
+      card.appendChild(volumeRow('背景音樂', Fx.getMusicVolume, Fx.setMusicVolume, function () {}));
+    }
 
     card.appendChild(segmented('語音語種',
       Sound.VOICE_SETS.map(function (s) { return { value: s.id, text: s.name }; }),
@@ -812,9 +833,67 @@
       text.appendChild(el('b', null, g.name));
       text.appendChild(el('small', null, g.desc));
       b.appendChild(text);
+      b.appendChild(el('i', 'dot hub-dot hidden'));
       b.addEventListener('click', function () { ui[g.id].open(); });
       list.appendChild(b);
     });
+  }
+
+  /* 提示：還有沒做完或可以玩的東西 */
+
+  var HINT_FIRST = 14000;
+  var HINT_REPEAT = 30000;
+  var HINT_MAX = 3;
+  var hintTimer = null;
+  var hintCount = 0;
+
+  function petHungry() {
+    var Pet = window.TurtlePet;
+    var pet = profile.pet;
+    if (!Pet || !pet || !pet.since) return false;
+    var cost = Pet.feedCost(P.petLevelInfo(pet.xp).level);
+    return Pet.fullnessNow(pet, E.clock(profile, Date.now())) < 40 && profile.wallet.turtles >= cost;
+  }
+
+  function updateHubDots() {
+    var dot = document.querySelector('[data-destination="pet"] .hub-dot');
+    if (dot) dot.classList.toggle('hidden', !petHungry());
+  }
+
+  function visible(node) { return node && !node.disabled && node.offsetParent !== null ? node : null; }
+
+  function hintTarget() {
+    if (document.querySelector('.modal') || busy || modBusy) return null;
+    if (phase === 'title') return visible(supplyReady() ? $('supplyBtn') : document.querySelector('#titleScreen .tap-hint'));
+    if (phase === 'start') {
+      for (var i = packRows.length - 1; i >= 0; i--) if (visible(packRows[i].el)) return packRows[i].el;
+      return visible(startSupplyBtn);
+    }
+    if (phase === 'play') return visible(spinBtn);
+    if (phase === 'result') return visible($('againBtn'));
+    if (phase === 'hub') return petHungry() ? visible(document.querySelector('[data-destination="pet"]')) : null;
+    if (BACK[phase] === 'hub') return visible(document.querySelector('#' + phase + 'Screen .btn.primary'));
+    return null;
+  }
+
+  function clearNudge() {
+    document.querySelectorAll('.nudge').forEach(function (n) { n.classList.remove('nudge'); });
+  }
+
+  function fireHint() {
+    var target = document.hidden ? null : hintTarget();
+    if (target) {
+      hintCount++;
+      target.classList.add('nudge');
+      fx('hint');
+    }
+    if (hintCount < HINT_MAX) hintTimer = setTimeout(fireHint, HINT_REPEAT);
+  }
+
+  function armHint() {
+    clearTimeout(hintTimer);
+    clearNudge();
+    if (hintCount < HINT_MAX) hintTimer = setTimeout(fireHint, hintCount ? HINT_REPEAT : HINT_FIRST);
   }
 
   /* 事件與初始化 */
@@ -834,6 +913,8 @@
     walletRow: walletRow,
     refreshWallets: refreshWallets,
     setBusy: function (b) { modBusy = !!b; },
+    fx: fx,
+    mood: function (id) { if (Fx) Fx.mood(id); },
     Sound: Sound
   };
 
@@ -868,6 +949,11 @@
     else if (phase === 'play') { e.preventDefault(); playRound(); }
   });
   document.addEventListener('visibilitychange', function () { if (document.hidden) flushCloud(); });
+  document.addEventListener('click', function (e) {
+    var b = e.target.closest && e.target.closest('button');
+    if (b && !b.disabled) fx('tap');
+  }, true);
+  document.addEventListener('pointerdown', function () { hintCount = 0; armHint(); }, true);
 
   COLORS.forEach(function (c) { new Image().src = c.img; });
   applyTheme(document.documentElement.getAttribute('data-theme') || 'light');

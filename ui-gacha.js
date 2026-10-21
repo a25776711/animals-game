@@ -83,6 +83,8 @@
       app.notify(unlocked);
       if (res.cards.some(function (c) { return c.rarity === 3; })) app.toastText('抽到傳說烏龜！');
       render();
+      app.fx('gachaDraw');
+      res.cards.forEach(function (c, i) { app.fx('reveal', c.rarity, i * 0.12 + 0.3); });
     }
 
     return {
