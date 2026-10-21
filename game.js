@@ -2,15 +2,15 @@
   'use strict';
 
   var ANIMALS = [
-    { id: 0, name: '貓',   emoji: '🐱' },
-    { id: 1, name: '狗',   emoji: '🐶' },
-    { id: 2, name: '兔',   emoji: '🐰' },
-    { id: 3, name: '熊',   emoji: '🐻' },
-    { id: 4, name: '貓熊', emoji: '🐼' },
-    { id: 5, name: '狐狸', emoji: '🦊' },
-    { id: 6, name: '青蛙', emoji: '🐸' },
-    { id: 7, name: '猴',   emoji: '🐵' },
-    { id: 8, name: '豬',   emoji: '🐷' }
+    { id: 0, name: '綠龜',   img: 'img/turtle-green.png' },
+    { id: 1, name: '淺藍龜', img: 'img/turtle-lightblue.png' },
+    { id: 2, name: '藍龜',   img: 'img/turtle-blue.png' },
+    { id: 3, name: '紫龜',   img: 'img/turtle-purple.png' },
+    { id: 4, name: '桃龜',   img: 'img/turtle-pink.png' },
+    { id: 5, name: '紅龜',   img: 'img/turtle-red.png' },
+    { id: 6, name: '橘龜',   img: 'img/turtle-orange.png' },
+    { id: 7, name: '橘黃龜', img: 'img/turtle-amber.png' },
+    { id: 8, name: '黃龜',   img: 'img/turtle-yellow.png' }
   ];
   var PACK_OPTIONS = [10, 20, 50];
   var COST_PER_ROUND = 2;
@@ -184,6 +184,7 @@
     else if (phase === 'play') { e.preventDefault(); playRound(); }
   });
 
+  ANIMALS.forEach(function (a) { if (a.img) new Image().src = a.img; });
   buildPackButtons();
   show('title');
 })();
