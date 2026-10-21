@@ -3,7 +3,13 @@
 
   var KEY = 'turtle.profile.v1';
   var COLOR_COUNT = 9;
-  var STAT_KEYS = ['opened', 'pairs', 'lines', 'families', 'lucky', 'games', 'bestRounds', 'bestGained', 'maxChain'];
+  var RARITY_COUNT = 4;
+  var SLOT_COUNT = 3;
+  var STAT_KEYS = [
+    'opened', 'pairs', 'lines', 'families', 'lucky', 'games', 'bestRounds', 'bestGained', 'maxChain',
+    'claims', 'wheelBest', 'raceWins', 'raceBigWins', 'bjWins', 'bjBlackjacks', 'memPerfects',
+    'gachaDraws', 'legendaries'
+  ];
 
   function def(id, icon, name, desc, stat, target) {
     return { id: id, icon: icon, name: name, desc: desc, stat: stat, target: target };
@@ -28,7 +34,20 @@
     def('gained_30', '💰', '小有收穫', '單局獲得 30 包', 'bestGained', 30),
     def('gained_100', '🤑', '大豐收', '單局獲得 100 包', 'bestGained', 100),
     def('games_10', '🎮', '常客', '玩滿 10 局', 'games', 10),
-    def('all_lucky', '🌈', '色彩收藏家', '9 種顏色都當過幸運色', 'luckyColors', COLOR_COUNT)
+    def('all_lucky', '🌈', '色彩收藏家', '9 種顏色都當過幸運色', 'luckyColors', COLOR_COUNT),
+    def('first_claim', '🎀', '領補給', '領取第一次補給', 'claims', 1),
+    def('claim_10', '📅', '補給常客', '累計領取 10 次補給', 'claims', 10),
+    def('wheel_350', '🎡', '轉盤大獎', '轉盤轉到 350 錢', 'wheelBest', 350),
+    def('race_win', '🏁', '賽跑贏家', '烏龜賽跑押中一次', 'raceWins', 1),
+    def('race_big', '🚀', '冷門大贏', '押中賠率 8 倍以上的烏龜', 'raceBigWins', 1),
+    def('bj_win', '🃏', '21 點初勝', '21 點贏一局', 'bjWins', 1),
+    def('bj_natural', '♠️', 'Blackjack', '21 點一開牌就是 21', 'bjBlackjacks', 1),
+    def('mem_perfect', '🧠', '好記性', '翻牌記憶 10 步內完成', 'memPerfects', 1),
+    def('gacha_1', '🎰', '初次抽卡', '抽一次卡', 'gachaDraws', 1),
+    def('gacha_100', '🎟️', '抽卡達人', '累計抽 100 次', 'gachaDraws', 100),
+    def('legend_1', '👑', '傳說降臨', '抽到傳說烏龜', 'legendaries', 1),
+    def('collect_18', '📖', '收藏家', '集到 18 種不同的卡', 'cardTypes', 18),
+    def('collect_36', '🏆', '圖鑑完成', '集齊 36 種卡', 'cardTypes', 36)
   ];
 
   function zeroStats() {
@@ -38,7 +57,14 @@
   }
 
   function defaultProfile() {
-    return { v: 1, stats: zeroStats(), luckyUsed: {}, achievements: {}, updatedAt: 0 };
+    return {
+      v: 2, rev: 0,
+      stats: zeroStats(), luckyUsed: {}, achievements: {},
+      wallet: { money: 0, turtles: 0 },
+      daily: { day: '', claimed: [false, false, false] },
+      gifts: { starter: false, firstLogin: false },
+      cards: {}, pity: 0, timeMark: 0, updatedAt: 0
+    };
   }
 
   function num(v) {
@@ -49,8 +75,10 @@
   function normalize(raw) {
     var p = defaultProfile();
     if (!raw || typeof raw !== 'object') return p;
+
     var s = raw.stats || {};
     STAT_KEYS.forEach(function (k) { p.stats[k] = num(s[k]); });
+
     Object.keys(raw.luckyUsed || {}).forEach(function (k) {
       var c = Number(k);
       if (raw.luckyUsed[k] && c >= 0 && c < COLOR_COUNT && c % 1 === 0) p.luckyUsed[c] = true;
@@ -59,12 +87,47 @@
       var t = num(raw.achievements[id]);
       if (t) p.achievements[id] = t;
     });
+
+    var w = raw.wallet;
+    p.wallet.money = w ? num(w.money) : 0;
+    p.wallet.turtles = w ? num(w.turtles) : p.stats.opened;
+
+    var d = raw.daily || {};
+    if (typeof d.day === 'string' && /^\d{4}-\d{2}-\d{2}$/.test(d.day)) p.daily.day = d.day;
+    if (Array.isArray(d.claimed)) {
+      for (var i = 0; i < SLOT_COUNT; i++) p.daily.claimed[i] = d.claimed[i] === true;
+    }
+
+    var g = raw.gifts || {};
+    p.gifts.starter = g.starter === true;
+    p.gifts.firstLogin = g.firstLogin === true;
+
+    Object.keys(raw.cards || {}).forEach(function (k) {
+      var n = num(raw.cards[k]);
+      if (/^[0-8]-[0-3]$/.test(k) && n) p.cards[k] = n;
+    });
+
+    p.pity = num(raw.pity);
+    p.rev = num(raw.rev);
+    var hadProgress = p.stats.opened || p.stats.games || Object.keys(p.achievements).length;
+    if (raw.v !== 2 && hadProgress && p.rev === 0) p.rev = 1;
+    p.timeMark = num(raw.timeMark);
     p.updatedAt = num(raw.updatedAt);
     return p;
   }
 
+  function clone(p) {
+    return JSON.parse(JSON.stringify(p));
+  }
+
+  function cardTypes(p) {
+    return Object.keys(p.cards).filter(function (k) { return p.cards[k] > 0; }).length;
+  }
+
   function value(p, d) {
-    return d.stat === 'luckyColors' ? Object.keys(p.luckyUsed).length : p.stats[d.stat];
+    if (d.stat === 'luckyColors') return Object.keys(p.luckyUsed).length;
+    if (d.stat === 'cardTypes') return cardTypes(p);
+    return p.stats[d.stat];
   }
 
   function evaluate(p, now) {
@@ -78,11 +141,16 @@
     return unlocked;
   }
 
+  function touch(p, now) {
+    p.rev++;
+    p.updatedAt = now;
+  }
+
   function record(p, kind, data, now) {
     var s = p.stats;
     data = data || {};
     if (kind === 'start') p.luckyUsed[data.lucky] = true;
-    else if (kind === 'open') s.opened++;
+    else if (kind === 'open') { s.opened++; p.wallet.turtles++; }
     else if (kind === 'lucky') s.lucky++;
     else if (kind === 'match') {
       if (data.type === 'pair') s.pairs++;
@@ -93,38 +161,85 @@
       s.games++;
       s.bestRounds = Math.max(s.bestRounds, data.rounds || 0);
       s.bestGained = Math.max(s.bestGained, data.gained || 0);
+    } else if (kind === 'claim') {
+      s.claims++;
+      if (data.wheel) s.wheelBest = Math.max(s.wheelBest, data.amount || 0);
+    } else if (kind === 'race') {
+      if (data.won) {
+        s.raceWins++;
+        if (data.odds >= 8) s.raceBigWins++;
+      }
+    } else if (kind === 'bj') {
+      if (data.result === 'win' || data.result === 'blackjack') s.bjWins++;
+      if (data.result === 'blackjack') s.bjBlackjacks++;
+    } else if (kind === 'mem') {
+      if (data.moves <= 10) s.memPerfects++;
+    } else if (kind === 'gacha') {
+      s.gachaDraws += data.draws || 0;
+      s.legendaries += data.legendaries || 0;
     }
-    p.updatedAt = now;
+    touch(p, now);
     return evaluate(p, now);
   }
 
-  function merge(a, b) {
-    var out = defaultProfile();
-    STAT_KEYS.forEach(function (k) { out.stats[k] = Math.max(a.stats[k], b.stats[k]); });
-    [a, b].forEach(function (p) {
-      Object.keys(p.luckyUsed).forEach(function (c) { out.luckyUsed[c] = true; });
-      Object.keys(p.achievements).forEach(function (id) {
-        var t = p.achievements[id];
-        out.achievements[id] = out.achievements[id] ? Math.min(out.achievements[id], t) : t;
+  function isFresh(p) {
+    return p.rev === 0;
+  }
+
+  function content(p) {
+    return JSON.stringify([p.stats, p.luckyUsed, p.achievements, p.wallet, p.daily, p.gifts, p.cards, p.pity]);
+  }
+
+  function sameContent(a, b) {
+    return content(a) === content(b);
+  }
+
+  function decideSync(local, remote, baseRev) {
+    if (!remote || isFresh(remote)) return 'upload';
+    if (isFresh(local)) return 'download';
+    if (sameContent(local, remote)) return 'same';
+    if (baseRev != null) {
+      var localChanged = local.rev > baseRev;
+      var remoteChanged = remote.rev > baseRev;
+      if (localChanged && !remoteChanged) return 'upload';
+      if (remoteChanged && !localChanged) return 'download';
+    }
+    return 'ask';
+  }
+
+  function unionTimes(a, b) {
+    var out = {};
+    [a, b].forEach(function (src) {
+      Object.keys(src).forEach(function (k) {
+        out[k] = out[k] ? Math.min(out[k], src[k]) : src[k];
       });
     });
-    out.updatedAt = Math.max(a.updatedAt, b.updatedAt);
-    evaluate(out, out.updatedAt || Date.now());
     return out;
   }
 
-  function covers(a, b) {
-    var ok = STAT_KEYS.every(function (k) { return a.stats[k] >= b.stats[k]; });
-    ok = ok && Object.keys(b.luckyUsed).every(function (c) { return a.luckyUsed[c]; });
-    return ok && Object.keys(b.achievements).every(function (id) { return a.achievements[id]; });
-  }
+  function resolve(local, remote, side, keepAchievements, now) {
+    var base = clone(side === 'cloud' ? remote : local);
+    var other = side === 'cloud' ? local : remote;
 
-  function compare(local, remote) {
-    var l = covers(local, remote), r = covers(remote, local);
-    if (l && r) return 'same';
-    if (l) return 'localAhead';
-    if (r) return 'remoteAhead';
-    return 'diverged';
+    if (keepAchievements) {
+      base.achievements = unionTimes(base.achievements, other.achievements);
+      Object.keys(other.luckyUsed).forEach(function (c) { base.luckyUsed[c] = true; });
+    }
+
+    base.gifts.starter = base.gifts.starter || other.gifts.starter;
+    base.gifts.firstLogin = base.gifts.firstLogin || other.gifts.firstLogin;
+
+    if (base.daily.day === other.daily.day) {
+      for (var i = 0; i < SLOT_COUNT; i++) base.daily.claimed[i] = base.daily.claimed[i] || other.daily.claimed[i];
+    } else if (other.daily.day > base.daily.day) {
+      base.daily = clone(other.daily);
+    }
+
+    base.timeMark = Math.max(local.timeMark, remote.timeMark);
+    base.rev = Math.max(local.rev, remote.rev) + 1;
+    base.updatedAt = now;
+    evaluate(base, now);
+    return base;
   }
 
   function summary(p) {
@@ -132,7 +247,10 @@
       achievements: Object.keys(p.achievements).length,
       opened: p.stats.opened,
       games: p.stats.games,
-      bestRounds: p.stats.bestRounds
+      money: p.wallet.money,
+      turtles: p.wallet.turtles,
+      cards: cardTypes(p),
+      updatedAt: p.updatedAt
     };
   }
 
@@ -146,9 +264,10 @@
   }
 
   var api = {
-    DEFS: DEFS, COLOR_COUNT: COLOR_COUNT,
-    defaultProfile: defaultProfile, normalize: normalize, value: value,
-    evaluate: evaluate, record: record, merge: merge, compare: compare, summary: summary,
+    DEFS: DEFS, COLOR_COUNT: COLOR_COUNT, RARITY_COUNT: RARITY_COUNT, SLOT_COUNT: SLOT_COUNT,
+    defaultProfile: defaultProfile, normalize: normalize, clone: clone, value: value, cardTypes: cardTypes,
+    evaluate: evaluate, touch: touch, record: record,
+    isFresh: isFresh, sameContent: sameContent, decideSync: decideSync, resolve: resolve, summary: summary,
     load: load, save: save
   };
 

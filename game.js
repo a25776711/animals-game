@@ -3,6 +3,7 @@
 
   var L = window.TurtleLogic;
   var P = window.TurtleProgress;
+  var E = window.TurtleEconomy;
   var Cloud = window.Cloud;
   var Sound = window.TurtleSound;
 
@@ -22,21 +23,35 @@
     { packs: 20, hint: '約 11 回合' },
     { packs: 50, hint: '約 30 回合' }
   ];
+  var HUB_GAMES = [
+    { id: 'race', icon: '🏁', name: '烏龜賽跑', desc: '押一隻烏龜，賠率最高 16 倍' },
+    { id: 'bj', icon: '🃏', name: '21 點', desc: '跟莊家比點數，Blackjack 賠 6:5' },
+    { id: 'mem', icon: '🧠', name: '翻牌記憶', desc: '報名 50 烏龜，步數越少獎勵越多' },
+    { id: 'gacha', icon: '🎰', name: '抽卡圖鑑', desc: '抽 4 種稀有度的烏龜卡，集滿 36 種' }
+  ];
+  var BACK = { start: 'title', hub: 'title', supply: 'title', race: 'hub', bj: 'hub', mem: 'hub', gacha: 'hub' };
+
   var THEME_KEY = 'turtle.theme';
+  var LUCKY_KEY = 'turtle.lucky';
+  var SESSION_KEY = 'turtle.session';
+  var SYNC_KEY = 'turtle.sync';
   var MS = { open: 260, lucky: 900, match: 900, clear: 380 };
   var CLOUD_SAVE_DELAY = 3000;
-  var LUCKY_KEY = 'turtle.lucky';
   var TYPE_NAME = { pair: '碰', line: '連線', family: '全家福' };
 
   var $ = function (id) { return document.getElementById(id); };
 
-  var screens = {
-    title: $('titleScreen'),
-    start: $('startScreen'),
-    play: $('playScreen'),
-    result: $('resultScreen'),
-    ach: $('achScreen')
-  };
+  function el(tag, cls, text) {
+    var n = document.createElement(tag);
+    if (cls) n.className = cls;
+    if (text != null) n.textContent = text;
+    return n;
+  }
+
+  var screens = {};
+  document.querySelectorAll('.screen').forEach(function (s) {
+    screens[s.id.replace(/Screen$/, '')] = s;
+  });
   var backBtn = $('backBtn');
   var board = $('board');
   var spinBtn = $('spinBtn');
@@ -48,8 +63,10 @@
   var phase = 'title';
   var returnTo = 'title';
   var busy = false;
+  var modBusy = false;
   var cells = [];
   var lucky = loadLucky();
+  var ui = {};
 
   var account = null;
   var cloudReady = false;
@@ -67,6 +84,95 @@
 
   function wait(ms) { return new Promise(function (r) { setTimeout(r, ms); }); }
 
+  function fmt(n) { return Number(n).toLocaleString('en-US'); }
+
+  /* 通用元件 */
+
+  function toastText(text) {
+    var t = el('div', 'toast', text);
+    $('toasts').appendChild(t);
+    setTimeout(function () { t.remove(); }, 3400);
+  }
+
+  function toast(def) {
+    toastText('🏆 解鎖成就：' + def.icon + ' ' + def.name);
+  }
+
+  function notify(unlocked) {
+    unlocked.forEach(function (d) {
+      if (game) game.unlocked.push(d);
+      toast(d);
+    });
+  }
+
+  function openModal(opts) {
+    var overlay = el('div', 'modal');
+    overlay.setAttribute('role', 'dialog');
+    overlay.setAttribute('aria-modal', 'true');
+    overlay.setAttribute('aria-label', opts.label || '');
+    var card = el('div', 'modal-card');
+    overlay.appendChild(card);
+
+    function close() {
+      document.removeEventListener('keydown', onKey);
+      overlay.remove();
+      if (opts.onClose) opts.onClose();
+    }
+    function onKey(e) { if (e.key === 'Escape' && !opts.locked) close(); }
+    if (!opts.locked) overlay.addEventListener('click', function (e) { if (e.target === overlay) close(); });
+    document.addEventListener('keydown', onKey);
+    document.body.appendChild(overlay);
+    return { card: card, close: close };
+  }
+
+  /* 錢包 */
+
+  function walletPill(kind) {
+    var pill = el('div', 'wallet-pill');
+    pill.setAttribute('data-kind', kind);
+    if (kind === 'money') {
+      pill.appendChild(el('span', null, '🪙'));
+    } else {
+      var img = el('img');
+      img.src = COLORS[0].img;
+      img.alt = '';
+      pill.appendChild(img);
+    }
+    pill.appendChild(el('b', null, '0'));
+    pill.appendChild(el('small', null, kind === 'money' ? '錢' : '烏龜'));
+    return pill;
+  }
+
+  function walletRow(kinds) {
+    var row = el('div', 'wallet-row');
+    kinds.forEach(function (k) { row.appendChild(walletPill(k)); });
+    return row;
+  }
+
+  function refreshWallets() {
+    document.querySelectorAll('.wallet-pill').forEach(function (p) {
+      p.querySelector('b').textContent = fmt(profile.wallet[p.getAttribute('data-kind')]);
+    });
+    updatePackRows();
+  }
+
+  function fillWalletRows() {
+    document.querySelectorAll('.wallet-row[data-kinds]').forEach(function (row) {
+      row.getAttribute('data-kinds').split(',').forEach(function (k) { row.appendChild(walletPill(k)); });
+      row.removeAttribute('data-kinds');
+    });
+  }
+
+  function supplyReady() {
+    return E.dailyStatus(profile, Date.now()).slots.some(function (s) { return s.state === 'ready'; });
+  }
+
+  function updateSupplyDot() {
+    $('supplyDot').classList.toggle('hidden', !supplyReady());
+  }
+
+  /* 導覽 */
+
   function show(name) {
     phase = name;
     Object.keys(screens).forEach(function (k) {
@@ -74,24 +180,19 @@
     });
     backBtn.classList.toggle('hidden', name === 'title' || name === 'result');
     if (name === 'ach') renderAchievements();
-  }
-
-  function toast(def) {
-    var el = document.createElement('div');
-    el.className = 'toast';
-    el.textContent = '🏆 解鎖成就：' + def.icon + ' ' + def.name;
-    $('toasts').appendChild(el);
-    setTimeout(function () { el.remove(); }, 3400);
+    if (name === 'title') updateSupplyDot();
+    refreshWallets();
   }
 
   function record(kind, data) {
     var unlocked = P.record(profile, kind, data, Date.now());
+    persist();
+    notify(unlocked);
+  }
+
+  function persist() {
     P.save(profile);
     scheduleCloudSave();
-    unlocked.forEach(function (d) {
-      if (game) game.unlocked.push(d);
-      toast(d);
-    });
   }
 
   /* 雲端存檔 */
@@ -102,11 +203,9 @@
       if (!Cloud || !Cloud.enabled) { bar.classList.add('hidden'); return; }
       bar.classList.remove('hidden');
       bar.innerHTML = '';
-      var status = document.createElement('span');
-      status.className = 'status';
-      var btn = document.createElement('button');
+      var status = el('span', 'status');
+      var btn = el('button', 'btn');
       btn.type = 'button';
-      btn.className = 'btn';
       if (account) {
         status.textContent = '☁ ' + account.name + (syncText ? '・' + syncText : '');
         btn.textContent = '登出';
@@ -137,25 +236,33 @@
     flushCloud().then(function () { return Cloud.signOut(); });
   }
 
+  function loadBase(uid) {
+    try {
+      var s = JSON.parse(localStorage.getItem(SYNC_KEY));
+      if (s && s.uid === uid && isFinite(s.rev)) return s.rev;
+    } catch (e) {}
+    return null;
+  }
+
+  function saveBase(uid, rev) {
+    try { localStorage.setItem(SYNC_KEY, JSON.stringify({ uid: uid, rev: rev })); } catch (e) {}
+  }
+
   function summaryColumn(title, p) {
     var s = P.summary(p);
-    var col = document.createElement('div');
-    var head = document.createElement('b');
-    head.textContent = title;
-    col.appendChild(head);
+    var col = el('div');
+    col.appendChild(el('b', null, title));
     [
+      ['錢', fmt(s.money)],
+      ['烏龜', fmt(s.turtles)],
       ['成就', s.achievements + '/' + P.DEFS.length],
-      ['累計開包', s.opened],
-      ['玩過', s.games + ' 局'],
-      ['最佳回合', s.bestRounds]
+      ['累計開包', fmt(s.opened)],
+      ['卡片', s.cards + '/36'],
+      ['更新', s.updatedAt ? new Date(s.updatedAt).toLocaleString('zh-TW', { month: 'numeric', day: 'numeric', hour: '2-digit', minute: '2-digit' }) : '—']
     ].forEach(function (r) {
-      var line = document.createElement('span');
-      var k = document.createElement('span');
-      var v = document.createElement('span');
-      k.textContent = r[0];
-      v.textContent = r[1];
-      line.appendChild(k);
-      line.appendChild(v);
+      var line = el('span');
+      line.appendChild(el('span', null, r[0]));
+      line.appendChild(el('span', null, r[1]));
       col.appendChild(line);
     });
     return col;
@@ -163,73 +270,71 @@
 
   function askConflict(local, remote) {
     return new Promise(function (resolve) {
-      var overlay = document.createElement('div');
-      overlay.className = 'modal';
-      overlay.setAttribute('role', 'dialog');
-      overlay.setAttribute('aria-modal', 'true');
-      overlay.setAttribute('aria-label', '進度不一致');
+      var m = openModal({ label: '進度不一致', locked: true });
+      var card = m.card;
+      card.appendChild(el('h3', null, '進度不一致'));
+      card.appendChild(el('p', null, '這台裝置和雲端的進度不一樣，請選擇要用哪一份：'));
 
-      var card = document.createElement('div');
-      card.className = 'modal-card';
-
-      var title = document.createElement('h3');
-      title.textContent = '進度不一致';
-      var text = document.createElement('p');
-      text.textContent = '這台裝置和雲端各有對方沒有的進度，請選擇要保留哪一份：';
-
-      var compare = document.createElement('div');
-      compare.className = 'compare';
+      var compare = el('div', 'compare');
       compare.appendChild(summaryColumn('這台裝置', local));
       compare.appendChild(summaryColumn('雲端', remote));
-
-      card.appendChild(title);
-      card.appendChild(text);
       card.appendChild(compare);
 
-      function finish(choice) {
-        overlay.remove();
-        resolve(choice);
+      var keepLabel = el('label', 'keep-ach');
+      var keep = el('input');
+      keep.type = 'checkbox';
+      keep.checked = true;
+      keepLabel.appendChild(keep);
+      keepLabel.appendChild(document.createTextNode(' 也保留另一邊的成就（兩邊聯集）'));
+      card.appendChild(keepLabel);
+
+      function finish(value) {
+        m.close();
+        resolve(value);
       }
 
       var first = null;
       [
-        ['merge', '合併兩邊', '數值取較大、成就取聯集，不會丟進度'],
-        ['local', '只用這台裝置的', '雲端那份會被覆蓋'],
-        ['cloud', '只用雲端的', '這台裝置多出的進度會消失']
+        ['local', '用這台裝置的', '雲端那份會被覆蓋'],
+        ['cloud', '用雲端的', '這台的錢、烏龜、卡片會被換掉']
       ].forEach(function (c) {
-        var b = document.createElement('button');
+        var b = el('button', 'btn choice ' + (c[0] === 'local' ? 'local' : 'cloud'));
         b.type = 'button';
-        b.className = 'btn choice ' + c[0];
         b.appendChild(document.createTextNode(c[1]));
-        var sub = document.createElement('small');
-        sub.textContent = c[2];
-        b.appendChild(sub);
-        b.addEventListener('click', function () { finish(c[0]); });
+        b.appendChild(el('small', null, c[2]));
+        b.addEventListener('click', function () { finish({ side: c[0], keepAchievements: keep.checked }); });
         card.appendChild(b);
         if (!first) first = b;
       });
 
-      var cancel = document.createElement('button');
+      var cancel = el('button', 'linkbtn', '取消登入');
       cancel.type = 'button';
-      cancel.className = 'linkbtn';
-      cancel.textContent = '取消登入';
-      cancel.addEventListener('click', function () { finish('cancel'); });
+      cancel.addEventListener('click', function () { finish(null); });
       card.appendChild(cancel);
-
-      overlay.appendChild(card);
-      document.body.appendChild(overlay);
       first.focus();
     });
   }
 
-  function chooseProfile(local, remote) {
-    if (P.compare(local, remote) !== 'diverged') return Promise.resolve(P.merge(local, remote));
-    return askConflict(local, remote).then(function (choice) {
-      if (choice === 'merge') return P.merge(local, remote);
-      if (choice === 'local') return local;
-      if (choice === 'cloud') return remote;
-      return null;
-    });
+  function chooseProfile(remote, base) {
+    var decision = P.decideSync(profile, remote, base);
+    if (decision === 'ask') {
+      return askConflict(profile, remote).then(function (c) {
+        return c ? P.resolve(profile, remote, c.side, c.keepAchievements, Date.now()) : null;
+      });
+    }
+    if (decision === 'download') return Promise.resolve(P.resolve(profile, remote, 'cloud', true, Date.now()));
+    return Promise.resolve(profile);
+  }
+
+  function giftDialog() {
+    var m = openModal({ label: '首次登入禮' });
+    m.card.appendChild(el('h3', null, '🎁 首次登入禮'));
+    m.card.appendChild(el('p', null, '歡迎！送你 ' + E.CFG.firstLoginMoney + ' 錢，可以玩 ' + (E.CFG.firstLoginMoney / 50) + ' 次 50 包。'));
+    var ok = el('button', 'btn choice merge', '太好了');
+    ok.type = 'button';
+    ok.addEventListener('click', m.close);
+    m.card.appendChild(ok);
+    ok.focus();
   }
 
   function syncFromCloud() {
@@ -237,16 +342,22 @@
     syncing = true;
     syncText = '同步中…';
     renderAccount();
+    var uid = account.uid;
     return Cloud.loadProfile().then(function (raw) {
-      return chooseProfile(profile, P.normalize(raw));
+      return chooseProfile(raw ? P.normalize(raw) : null, loadBase(uid));
     }).then(function (chosen) {
       if (!chosen) {
         syncText = '';
         return Cloud.signOut();
       }
       profile = chosen;
+      var gift = E.grantFirstLogin(profile, Date.now());
       P.save(profile);
+      refreshWallets();
+      if (gift) giftDialog();
+      var rev = profile.rev;
       return Cloud.saveProfile(profile).then(function () {
+        saveBase(uid, rev);
         cloudReady = true;
         syncText = '已同步';
         renderAccount();
@@ -268,7 +379,9 @@
     clearTimeout(cloudTimer);
     if (!account || !cloudReady) return Promise.resolve();
     var who = account;
+    var rev = profile.rev;
     return Cloud.saveProfile(profile).then(function () {
+      saveBase(who.uid, rev);
       if (account === who) { syncText = '已同步'; renderAccount(); }
     }).catch(function () {
       if (account === who) { syncText = '同步失敗'; renderAccount(); }
@@ -281,25 +394,23 @@
     board.innerHTML = '';
     cells = [];
     for (var i = 0; i < L.SIZE; i++) {
-      var el = document.createElement('div');
-      el.className = 'cell';
-      el.setAttribute('role', 'gridcell');
-      board.appendChild(el);
-      cells.push(el);
+      var c = el('div', 'cell');
+      c.setAttribute('role', 'gridcell');
+      board.appendChild(c);
+      cells.push(c);
     }
   }
 
   function renderCell(i, color, cls) {
-    var el = cells[i];
-    el.className = 'cell';
-    el.innerHTML = '';
+    var c = cells[i];
+    c.className = 'cell';
+    c.innerHTML = '';
     if (color == null) return;
-    var img = document.createElement('img');
-    img.className = 'icon';
+    var img = el('img', 'icon');
     img.src = COLORS[color].img;
     img.alt = COLORS[color].name + '色烏龜';
-    el.appendChild(img);
-    if (cls) el.classList.add(cls);
+    c.appendChild(img);
+    if (cls) c.classList.add(cls);
   }
 
   function renderHud() {
@@ -335,33 +446,18 @@
       var got = !!profile.achievements[d.id];
       var v = Math.min(P.value(profile, d), d.target);
 
-      var card = document.createElement('div');
-      card.className = 'ach ' + (got ? 'done' : 'locked');
-
-      var icon = document.createElement('div');
-      icon.className = 'ach-icon';
-      icon.textContent = d.icon;
-
-      var body = document.createElement('div');
-      var name = document.createElement('div');
-      name.className = 'ach-name';
-      name.textContent = d.name + (got ? ' ✓' : '');
-      var desc = document.createElement('div');
-      desc.className = 'ach-desc';
-      desc.textContent = d.desc + (got ? '' : '（' + v + '/' + d.target + '）');
-      body.appendChild(name);
-      body.appendChild(desc);
-
+      var card = el('div', 'ach ' + (got ? 'done' : 'locked'));
+      var body = el('div');
+      body.appendChild(el('div', 'ach-name', d.name + (got ? ' ✓' : '')));
+      body.appendChild(el('div', 'ach-desc', d.desc + (got ? '' : '（' + v + '/' + d.target + '）')));
       if (!got) {
-        var bar = document.createElement('div');
-        bar.className = 'ach-bar';
-        var fill = document.createElement('i');
+        var bar = el('div', 'ach-bar');
+        var fill = el('i');
         fill.style.width = Math.round(v / d.target * 100) + '%';
         bar.appendChild(fill);
         body.appendChild(bar);
       }
-
-      card.appendChild(icon);
+      card.appendChild(el('div', 'ach-icon', d.icon));
       card.appendChild(body);
       list.appendChild(card);
     });
@@ -369,12 +465,44 @@
 
   /* 遊戲流程 */
 
+  function saveSession() {
+    if (!game || game.finished) return;
+    try {
+      localStorage.setItem(SESSION_KEY, JSON.stringify({
+        packs: game.packs, rounds: game.rounds, opened: game.opened, gained: game.gained
+      }));
+    } catch (e) {}
+  }
+
+  function clearSession() {
+    try { localStorage.removeItem(SESSION_KEY); } catch (e) {}
+  }
+
+  function settleAbandoned() {
+    var s = null;
+    try { s = JSON.parse(localStorage.getItem(SESSION_KEY)); } catch (e) {}
+    if (!s) return;
+    clearSession();
+    var packs = Math.max(0, Math.floor(Number(s.packs) || 0));
+    var now = Date.now();
+    E.refundPacks(profile, packs, now);
+    if (Number(s.rounds) > 0) P.record(profile, 'end', { rounds: Number(s.rounds), gained: Number(s.gained) || 0 }, now);
+    P.save(profile);
+    toastText('上次沒結算的遊戲已自動結算' + (packs ? '，退還 ' + packs + ' 錢' : ''));
+  }
+
   function startGame(packs) {
+    if (!E.buyPacks(profile, packs, Date.now())) {
+      toastText('錢不夠，去補給站領一些吧');
+      return;
+    }
     game = {
       start: packs, packs: packs, rounds: 0, opened: 0, gained: 0,
       grid: L.emptyGrid(), lucky: lucky, finished: false, unlocked: [],
       counts: { pair: 0, line: 0, family: 0, lucky: 0 }
     };
+    persist();
+    saveSession();
     buildBoard();
     renderHud();
     $('luckyImg').src = COLORS[lucky].img;
@@ -407,6 +535,7 @@
       renderCell(i, color, 'pop');
       renderHud();
       record('open');
+      saveSession();
       announce('開包中 ' + (k + 1) + '/' + empties.length);
       await wait(MS.open);
 
@@ -417,6 +546,7 @@
         cells[i].classList.add('lucky');
         renderHud();
         record('lucky');
+        saveSession();
         announce('🍀 幸運色！+1 包', 'lucky');
         await Promise.all([wait(MS.lucky), Sound.play('lucky')]);
       }
@@ -448,6 +578,7 @@
       game.counts[ev.type]++;
       renderHud();
       record('match', { type: ev.type });
+      saveSession();
     }
     record('round', { chain: events.length });
 
@@ -464,13 +595,21 @@
   function finishGame() {
     if (!game || game.finished) return;
     game.finished = true;
+    var ranOut = game.packs <= 0;
+    var refund = game.packs;
+    var now = Date.now();
+    if (refund > 0) E.refundPacks(profile, refund, now);
     if (game.rounds > 0) record('end', { rounds: game.rounds, gained: game.gained });
+    else persist();
+    clearSession();
+    refreshWallets();
     flushCloud();
 
     var c = game.counts;
-    $('resultTitle').textContent = game.packs <= 0 ? '包數用完了！' : '本局結算';
+    $('resultTitle').textContent = ranOut ? '包數用完了！' : '本局結算';
+    $('resTurtles').textContent = '+' + fmt(game.opened) + '（共 ' + fmt(profile.wallet.turtles) + '）';
+    $('resRefund').textContent = refund > 0 ? '+' + fmt(refund) : '0';
     $('resGained').textContent = '+' + game.gained;
-    $('resPacks').textContent = game.start + ' → ' + game.packs;
     $('resRounds').textContent = game.rounds + ' / ' + game.opened;
     $('resMatches').textContent = c.pair + ' / ' + c.line;
     $('resBonus').textContent = c.family + ' / ' + c.lucky;
@@ -479,31 +618,41 @@
     resAch.innerHTML = '';
     resAch.classList.toggle('hidden', !game.unlocked.length);
     if (game.unlocked.length) {
-      var head = document.createElement('b');
-      head.textContent = '🏆 本局解鎖成就';
-      resAch.appendChild(head);
+      resAch.appendChild(el('b', null, '🏆 本局解鎖成就'));
       game.unlocked.forEach(function (d) {
-        var line = document.createElement('div');
-        line.textContent = d.icon + ' ' + d.name + '：' + d.desc;
-        resAch.appendChild(line);
+        resAch.appendChild(el('div', null, d.icon + ' ' + d.name + '：' + d.desc));
       });
     }
 
     setTimeout(function () { show('result'); }, 600);
   }
 
-  /* 初始化與事件 */
+  function confirmLeave() {
+    var m = openModal({ label: '離開遊戲' });
+    m.card.appendChild(el('h3', null, '離開這局？'));
+    m.card.appendChild(el('p', null, '離開會直接結算，剩下的 ' + game.packs + ' 包會退還成錢。'));
+    var stay = el('button', 'btn choice merge', '繼續玩');
+    stay.type = 'button';
+    stay.addEventListener('click', m.close);
+    var leave = el('button', 'btn choice cloud', '結算並離開');
+    leave.type = 'button';
+    leave.addEventListener('click', function () { m.close(); finishGame(); });
+    m.card.appendChild(stay);
+    m.card.appendChild(leave);
+    stay.focus();
+  }
+
+  /* 開局頁 */
 
   function buildLuckyPicker() {
     var wrap = $('luckyPicker');
     COLORS.forEach(function (c) {
-      var b = document.createElement('button');
+      var b = el('button', 'lucky-opt');
       b.type = 'button';
-      b.className = 'lucky-opt';
       b.setAttribute('role', 'radio');
       b.setAttribute('aria-label', c.name + '色');
       b.setAttribute('aria-checked', String(c.id === lucky));
-      var img = document.createElement('img');
+      var img = el('img');
       img.src = c.img;
       img.alt = '';
       b.appendChild(img);
@@ -518,23 +667,39 @@
     });
   }
 
+  var packRows = [];
+  var startSupplyBtn = null;
+
   function buildPackButtons() {
     var wrap = $('packOptions');
     PACK_OPTIONS.forEach(function (o) {
-      var b = document.createElement('button');
+      var b = el('button', 'btn pack-row');
       b.type = 'button';
-      b.className = 'btn pack-row';
       b.setAttribute('role', 'listitem');
-      var label = document.createElement('span');
-      label.textContent = o.packs + ' 包';
-      var hint = document.createElement('small');
-      hint.textContent = o.hint;
-      b.appendChild(label);
-      b.appendChild(hint);
+      b.appendChild(el('span', null, o.packs + ' 包'));
+      b.appendChild(el('small', null, '花 ' + o.packs + ' 錢・' + o.hint));
       b.addEventListener('click', function () { startGame(o.packs); });
       wrap.appendChild(b);
+      packRows.push({ el: b, packs: o.packs });
     });
+    startSupplyBtn = el('button', 'btn secondary hidden', '🎁 去補給站');
+    startSupplyBtn.type = 'button';
+    startSupplyBtn.addEventListener('click', function () { ui.supply.open(); });
+    screens.start.appendChild(startSupplyBtn);
   }
+
+  function updatePackRows() {
+    if (!packRows.length) return;
+    var money = profile.wallet.money;
+    packRows.forEach(function (r) { r.el.disabled = money < r.packs; });
+    var broke = money < PACK_OPTIONS[0].packs;
+    $('startNote').textContent = broke
+      ? '錢不夠了，補給站每天有三次補給'
+      : '一包 = 一錢。碰 +1・連線 +3・全家福 +5・幸運色 +1';
+    startSupplyBtn.classList.toggle('hidden', !broke);
+  }
+
+  /* 設定 */
 
   function applyTheme(t) {
     document.documentElement.setAttribute('data-theme', t);
@@ -543,25 +708,18 @@
   }
 
   function segmented(label, options, current, onPick) {
-    var row = document.createElement('div');
-    row.className = 'setting';
+    var row = el('div', 'setting');
+    var head = el('div', 'setting-head');
+    head.appendChild(el('span', null, label));
 
-    var head = document.createElement('div');
-    head.className = 'setting-head';
-    var title = document.createElement('span');
-    title.textContent = label;
-    head.appendChild(title);
-
-    var seg = document.createElement('div');
-    seg.className = 'seg';
+    var seg = el('div', 'seg');
     seg.setAttribute('role', 'radiogroup');
     seg.setAttribute('aria-label', label);
     options.forEach(function (o) {
-      var b = document.createElement('button');
+      var b = el('button', null, o.text);
       b.type = 'button';
       b.setAttribute('role', 'radio');
       b.setAttribute('aria-checked', String(o.value === current));
-      b.textContent = o.text;
       b.addEventListener('click', function () {
         seg.querySelectorAll('button').forEach(function (x) { x.setAttribute('aria-checked', String(x === b)); });
         onPick(o.value);
@@ -576,30 +734,16 @@
 
   function openSettings() {
     if (document.querySelector('.modal')) return;
+    var m = openModal({ label: '設定', onClose: function () { $('settingsBtn').focus(); } });
+    var card = m.card;
+    card.appendChild(el('h3', null, '設定'));
 
-    var overlay = document.createElement('div');
-    overlay.className = 'modal';
-    overlay.setAttribute('role', 'dialog');
-    overlay.setAttribute('aria-modal', 'true');
-    overlay.setAttribute('aria-label', '設定');
-
-    var card = document.createElement('div');
-    card.className = 'modal-card';
-
-    var title = document.createElement('h3');
-    title.textContent = '設定';
-    card.appendChild(title);
-
-    var volume = document.createElement('div');
-    volume.className = 'setting';
-    var head = document.createElement('div');
-    head.className = 'setting-head';
-    var volLabel = document.createElement('span');
-    volLabel.textContent = '音量';
-    var volValue = document.createElement('span');
-    head.appendChild(volLabel);
+    var volume = el('div', 'setting');
+    var head = el('div', 'setting-head');
+    head.appendChild(el('span', null, '音量'));
+    var volValue = el('span');
     head.appendChild(volValue);
-    var slider = document.createElement('input');
+    var slider = el('input');
     slider.type = 'range';
     slider.min = '0';
     slider.max = '100';
@@ -630,42 +774,66 @@
         try { localStorage.setItem(THEME_KEY, t); } catch (e) {}
       }));
 
-    var done = document.createElement('button');
+    var done = el('button', 'btn choice merge', '完成');
     done.type = 'button';
-    done.className = 'btn choice merge';
-    done.textContent = '完成';
+    done.addEventListener('click', m.close);
     card.appendChild(done);
-
-    function close() {
-      document.removeEventListener('keydown', onKey);
-      overlay.remove();
-      $('settingsBtn').focus();
-    }
-    function onKey(e) { if (e.key === 'Escape') close(); }
-    done.addEventListener('click', close);
-    overlay.addEventListener('click', function (e) { if (e.target === overlay) close(); });
-    document.addEventListener('keydown', onKey);
-
-    overlay.appendChild(card);
-    document.body.appendChild(overlay);
     done.focus();
   }
 
+  /* 小遊戲大廳 */
+
+  function buildHub() {
+    var list = $('hubList');
+    HUB_GAMES.forEach(function (g) {
+      var b = el('button', 'btn hub-card');
+      b.type = 'button';
+      b.appendChild(el('div', 'hub-icon', g.icon));
+      var text = el('div');
+      text.appendChild(el('b', null, g.name));
+      text.appendChild(el('small', null, g.desc));
+      b.appendChild(text);
+      b.addEventListener('click', function () { ui[g.id].open(); });
+      list.appendChild(b);
+    });
+  }
+
+  /* 事件與初始化 */
+
+  var app = {
+    COLORS: COLORS,
+    el: el,
+    fmt: fmt,
+    profile: function () { return profile; },
+    save: function () { persist(); refreshWallets(); updateSupplyDot(); },
+    notify: notify,
+    toastText: toastText,
+    show: show,
+    openModal: openModal,
+    walletRow: walletRow,
+    refreshWallets: refreshWallets,
+    setBusy: function (b) { modBusy = !!b; },
+    Sound: Sound
+  };
+
   screens.title.addEventListener('click', function (e) {
-    if (e.target.closest('.account, .menu-row')) return;
+    if (e.target.closest('.account, .menu-row, .wallet-row')) return;
     show('start');
   });
   $('achBtn').addEventListener('click', function () { returnTo = 'title'; show('ach'); });
   $('resAchBtn').addEventListener('click', function () { returnTo = 'result'; show('ach'); });
+  $('supplyBtn').addEventListener('click', function () { ui.supply.open(); });
+  $('hubBtn').addEventListener('click', function () { show('hub'); });
+  $('resHubBtn').addEventListener('click', function () { show('hub'); });
   $('againBtn').addEventListener('click', function () { show('start'); });
   spinBtn.addEventListener('click', playRound);
   cashOutBtn.addEventListener('click', function () { if (!busy && game) finishGame(); });
   $('settingsBtn').addEventListener('click', openSettings);
   backBtn.addEventListener('click', function () {
-    if (busy) return;
-    if (phase === 'play') show('start');
-    else if (phase === 'start') show('title');
-    else if (phase === 'ach') show(returnTo);
+    if (busy || modBusy) return;
+    if (phase === 'play') { if (game && !game.finished) confirmLeave(); return; }
+    var target = phase === 'ach' ? returnTo : BACK[phase];
+    if (target) show(target);
   });
 
   document.addEventListener('keydown', function (e) {
@@ -679,8 +847,22 @@
 
   COLORS.forEach(function (c) { new Image().src = c.img; });
   applyTheme(document.documentElement.getAttribute('data-theme') || 'light');
+
+  if (E.grantStarter(profile)) {
+    P.save(profile);
+    setTimeout(function () { toastText('🎁 新手禮：送你 ' + E.CFG.starterMoney + ' 錢'); }, 600);
+  }
+  settleAbandoned();
+
+  fillWalletRows();
   buildLuckyPicker();
   buildPackButtons();
+  buildHub();
+  ui.supply = window.TurtleSupplyUI.create(app);
+  ui.gacha = window.TurtleGachaUI.create(app);
+  ui.race = window.TurtleRaceUI.create(app);
+  ui.bj = window.TurtleBlackjackUI.create(app);
+  ui.mem = window.TurtleMemoryUI.create(app);
   renderAccount();
   if (Cloud && Cloud.enabled) {
     Cloud.onAuth(function (user) {
@@ -691,5 +873,6 @@
       if (user) syncFromCloud();
     });
   }
+  setInterval(updateSupplyDot, 30000);
   show('title');
 })();

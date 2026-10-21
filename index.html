@@ -26,18 +26,22 @@
     <section id="titleScreen" class="screen active" aria-label="標題">
       <h1 class="logo"><span>wū guī</span> <span>對對碰</span></h1>
       <p class="tap-hint">點擊畫面開始</p>
+      <div class="wallet-row" data-kinds="money,turtles"></div>
       <div class="menu-row">
+        <button id="supplyBtn" class="btn secondary" type="button">🎁 補給<i id="supplyDot" class="dot hidden"></i></button>
+        <button id="hubBtn" class="btn secondary" type="button">🎮 小遊戲</button>
         <button id="achBtn" class="btn secondary" type="button">🏆 成就</button>
       </div>
       <div class="account hidden"></div>
     </section>
 
     <section id="startScreen" class="screen" aria-label="開局設定">
+      <div class="wallet-row" data-kinds="money"></div>
       <h2 class="heading">選擇幸運色</h2>
       <div id="luckyPicker" class="lucky-picker" role="radiogroup" aria-label="幸運色"></div>
       <h2 class="heading sub">選擇起始包數</h2>
       <div id="packOptions" class="pack-list" role="list"></div>
-      <p class="rules">碰 +1・連線 +3・全家福 +5・幸運色 +1</p>
+      <p id="startNote" class="rules"></p>
     </section>
 
     <section id="playScreen" class="screen" aria-label="遊戲">
@@ -54,11 +58,12 @@
       <button id="cashOutBtn" class="btn secondary" type="button">結算</button>
     </section>
 
-    <section id="resultScreen" class="screen" aria-label="結果">
+    <section id="resultScreen" class="screen scroll" aria-label="結果">
       <h2 class="heading" id="resultTitle">本局結算</h2>
       <div class="result-card">
-        <div class="row big"><span>本局獲得</span><b id="resGained">0</b></div>
-        <div class="row"><span>起始 → 最終包數</span><b id="resPacks">0</b></div>
+        <div class="row big"><span>獲得烏龜</span><b id="resTurtles">0</b></div>
+        <div class="row"><span>退還剩餘包數（錢）</span><b id="resRefund">0</b></div>
+        <div class="row"><span>本局獲得包數</span><b id="resGained">0</b></div>
         <div class="row"><span>回合 / 開包數</span><b id="resRounds">0</b></div>
         <div class="row"><span>碰 / 連線</span><b id="resMatches">0</b></div>
         <div class="row"><span>全家福 / 幸運色</span><b id="resBonus">0</b></div>
@@ -66,6 +71,7 @@
       <div id="resAch" class="res-ach hidden"></div>
       <div class="menu-row">
         <button id="againBtn" class="btn primary" type="button">再玩一次</button>
+        <button id="resHubBtn" class="btn secondary" type="button">🎮 小遊戲</button>
         <button id="resAchBtn" class="btn secondary" type="button">🏆 成就</button>
       </div>
     </section>
@@ -76,13 +82,39 @@
       <div class="account hidden"></div>
       <div id="achList" class="ach-list"></div>
     </section>
+
+    <section id="supplyScreen" class="screen scroll" aria-label="補給站"></section>
+
+    <section id="hubScreen" class="screen scroll" aria-label="小遊戲">
+      <h2 class="heading">小遊戲</h2>
+      <div class="wallet-row" data-kinds="turtles"></div>
+      <p class="ach-note">小遊戲用「烏龜」當籌碼。烏龜從「烏龜對對碰」開包獲得。</p>
+      <div id="hubList" class="hub-list"></div>
+    </section>
+
+    <section id="raceScreen" class="screen scroll" aria-label="烏龜賽跑"></section>
+    <section id="bjScreen" class="screen scroll" aria-label="21 點"></section>
+    <section id="memScreen" class="screen scroll" aria-label="翻牌記憶"></section>
+    <section id="gachaScreen" class="screen scroll" aria-label="抽卡圖鑑"></section>
   </main>
 
   <script src="firebase-config.js"></script>
+  <script src="rng.js"></script>
   <script src="logic.js"></script>
   <script src="progress.js"></script>
+  <script src="economy.js"></script>
+  <script src="gacha.js"></script>
+  <script src="blackjack.js"></script>
+  <script src="race.js"></script>
+  <script src="memory.js"></script>
   <script src="cloud.js"></script>
   <script src="sound.js"></script>
+  <script src="ui-common.js"></script>
+  <script src="ui-supply.js"></script>
+  <script src="ui-gacha.js"></script>
+  <script src="ui-race.js"></script>
+  <script src="ui-bj.js"></script>
+  <script src="ui-mem.js"></script>
   <script src="game.js"></script>
 </body>
 </html>
