@@ -23,7 +23,7 @@
 ## 成就與存檔
 
 進度（開包數、碰 / 連線 / 全家福 / 幸運色次數、最佳紀錄、成就）一律存在瀏覽器 `localStorage`，沒登入也會保留。
-設定好 Firebase 後可用 Google 登入把進度存到雲端，換裝置也能延續。
+可用 Google 登入把進度存到雲端，換裝置也能延續。
 
 登入時比對這台裝置與雲端的進度：
 
@@ -38,57 +38,6 @@
 
 碰、連線、全家福、幸運色成立時會念「碰，加一包」「連線，加三包」「全家福，加五包」「幸運色，加一包」，語音念完才進下一組。右上角 🔊 / 🔇 可靜音，會記住設定。
 
-- 音檔在 `audio/cn/`（普通話）與 `audio/tw/`（台灣腔），用哪組由 `sound.js` 的 `VOICE_SET` 決定
-- 來源是 Google 翻譯的朗讀功能（非官方介面），**僅限非營利的個人專案使用**；日後若要放廣告或商用，請改用有明確商用授權的語音再替換這幾個檔案（檔名不變即可）
-- 手機瀏覽器要玩家先點過畫面才允許發聲，這部分已處理
-
 ## 黑白模式
 
 右上角 🌙 / ☀️ 切換深色與淺色。第一次進來跟著系統設定，之後記住你的選擇。
-
-## 啟用 Google 登入（Firebase）
-
-1. [Firebase 主控台](https://console.firebase.google.com/) → 新增專案
-2. 專案總覽 → **網頁應用程式**（`</>`）→ 註冊 → 複製 `firebaseConfig`
-3. **Authentication** → 登入方式 → 啟用 **Google**
-4. Authentication → 設定 → **已授權的網域** → 新增 `a25776711.github.io`（之後有自訂網域也要加）
-5. **Firestore Database** → 建立資料庫（正式模式），規則貼上：
-
-```
-rules_version = '2';
-service cloud.firestore {
-  match /databases/{database}/documents {
-    match /users/{uid} {
-      allow read, write: if request.auth != null && request.auth.uid == uid;
-    }
-  }
-}
-```
-
-6. 把第 2 步的設定貼進 `firebase-config.js`：
-
-```js
-window.FIREBASE_CONFIG = {
-  apiKey: '...',
-  authDomain: '...',
-  projectId: '...',
-  appId: '...'
-};
-```
-
-7. commit、push。設定前登入按鈕不會顯示。
-
-`firebaseConfig` 不是機密，可以放進公開倉庫；安全性由第 5 步的規則保證。
-
-## 本機執行
-
-```bash
-python -m http.server 8000
-```
-
-## 測試
-
-```bash
-node logic.test.js
-node progress.test.js
-```
