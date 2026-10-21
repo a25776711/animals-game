@@ -3,7 +3,7 @@ const P = require('./progress.js');
 const E = require('./economy.js');
 
 const t = (name, fn) => { fn(); console.log('ok  -', name); };
-const at = (d, h, m = 0) => new Date(2026, 9, d, h, m).getTime();
+const at = (d, h, m = 0) => Date.UTC(2026, 9, d, h - 8, m);
 const states = (p, ms) => E.dailyStatus(p, ms).slots.map(s => s.state).join(',');
 
 t('設定：三個時段、固定 200（= 4 次 50 包）、首次登入 250（= 5 次 50 包）', () => {
@@ -34,6 +34,14 @@ t('轉盤抽到的機率與權重一致（大量模擬）', () => {
 t('spinWheel 邊界：rng=0 → 第 0 格，rng≈1 → 最後一格', () => {
   assert.equal(E.spinWheel(() => 0), 0);
   assert.equal(E.spinWheel(() => 0.999999), E.CFG.wheel.length - 1);
+});
+
+t('日期與時段固定用台灣時間（UTC+8），不受手機時區影響', () => {
+  assert.equal(E.dayKey(Date.UTC(2026, 9, 20, 15, 59)), '2026-10-20');
+  assert.equal(E.dayKey(Date.UTC(2026, 9, 20, 16, 0)), '2026-10-21');
+  const p = P.defaultProfile();
+  assert.equal(states(p, Date.UTC(2026, 9, 20, 21, 59)), 'locked,locked,locked');
+  assert.equal(states(p, Date.UTC(2026, 9, 20, 22, 0)), 'ready,locked,locked');
 });
 
 t('一天內的時段狀態：6 點前全鎖、6 / 12 / 18 點依序開放', () => {

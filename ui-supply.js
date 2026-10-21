@@ -19,7 +19,7 @@
       screen.appendChild(app.walletRow(['money']));
       screen.appendChild(el('p', 'ach-note',
         '每天 ' + E.CFG.slotHours.map(function (h) { return pad(h) + ':00'; }).join('、') +
-        ' 各開放一份，當天內都能領，跨日就過期。可以直接領 ' + E.CFG.dailyFixed + ' 錢，或賭一把轉盤。'));
+        '（台灣時間）各開放一份，當天內都能領，跨日就過期。可以直接領 ' + E.CFG.dailyFixed + ' 錢，或賭一把轉盤。'));
 
       var status = E.dailyStatus(app.profile(), Date.now());
       var list = el('div', 'slot-list');

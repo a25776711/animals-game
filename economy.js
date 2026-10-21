@@ -20,17 +20,20 @@
     ]
   };
 
+  var HOUR_MS = 3600000;
+  var DAY_MS = 24 * HOUR_MS;
+  var TW_OFFSET = 8 * HOUR_MS;
+
   function pad(n) { return n < 10 ? '0' + n : String(n); }
 
   function dayKey(ms) {
-    var d = new Date(ms);
-    return d.getFullYear() + '-' + pad(d.getMonth() + 1) + '-' + pad(d.getDate());
+    var d = new Date(ms + TW_OFFSET);
+    return d.getUTCFullYear() + '-' + pad(d.getUTCMonth() + 1) + '-' + pad(d.getUTCDate());
   }
 
   function slotStart(ms, hour) {
-    var d = new Date(ms);
-    d.setHours(hour, 0, 0, 0);
-    return d.getTime();
+    var dayStart = Math.floor((ms + TW_OFFSET) / DAY_MS) * DAY_MS - TW_OFFSET;
+    return dayStart + hour * HOUR_MS;
   }
 
   function clock(p, nowMs) {

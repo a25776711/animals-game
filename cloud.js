@@ -57,7 +57,7 @@
     },
     saveProfile: function (profile) {
       return init().then(function (sdk) {
-        return sdk.f.setDoc(userDoc(sdk), { profile: profile });
+        return sdk.f.setDoc(userDoc(sdk), { profile: profile, serverTime: sdk.f.serverTimestamp() });
       });
     }
   };

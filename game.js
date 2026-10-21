@@ -37,6 +37,7 @@
   var SYNC_KEY = 'turtle.sync';
   var MS = { open: 260, lucky: 900, match: 900, clear: 380 };
   var CLOUD_SAVE_DELAY = 3000;
+  var CLOUD_RETRY_DELAY = 15000;
   var TYPE_NAME = { pair: '碰', line: '連線', family: '全家福' };
 
   var $ = function (id) { return document.getElementById(id); };
@@ -73,6 +74,7 @@
   var syncing = false;
   var syncText = '';
   var cloudTimer = null;
+  var cloudRetry = null;
 
   function loadLucky() {
     try {
@@ -381,10 +383,15 @@
     var who = account;
     var rev = profile.rev;
     return Cloud.saveProfile(profile).then(function () {
+      clearTimeout(cloudRetry);
       saveBase(who.uid, rev);
       if (account === who) { syncText = '已同步'; renderAccount(); }
     }).catch(function () {
-      if (account === who) { syncText = '同步失敗'; renderAccount(); }
+      if (account !== who) return;
+      syncText = '同步失敗，稍後重試';
+      renderAccount();
+      clearTimeout(cloudRetry);
+      cloudRetry = setTimeout(flushCloud, CLOUD_RETRY_DELAY);
     });
   }
 
