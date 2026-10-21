@@ -92,20 +92,3 @@ python -m http.server 8000
 node logic.test.js
 node progress.test.js
 ```
-
-## 調整
-
-- 起始包數列表（數字與提示文字）、顏色與圖片：`game.js` 的 `PACK_OPTIONS`、`COLORS`
-- 動畫速度：`game.js` 的 `MS`
-- 獎勵：`logic.js` 的 `REWARD`
-- 成就：`progress.js` 的 `DEFS`
-- 配色：`style.css` 最上方的 `:root`（淺色）與 `:root[data-theme="dark"]`（深色）
-
-## 檔案
-
-- `logic.js` — 開包後的組合判定
-- `progress.js` — 統計、成就、合併
-- `cloud.js` — Firebase 登入與雲端存檔
-- `sound.js` — 語音播放與靜音
-- `game.js` — 畫面流程與動畫
-- `firebase-config.js` — Firebase 設定
