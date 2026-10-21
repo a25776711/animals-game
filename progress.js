@@ -113,6 +113,29 @@
     return out;
   }
 
+  function covers(a, b) {
+    var ok = STAT_KEYS.every(function (k) { return a.stats[k] >= b.stats[k]; });
+    ok = ok && Object.keys(b.luckyUsed).every(function (c) { return a.luckyUsed[c]; });
+    return ok && Object.keys(b.achievements).every(function (id) { return a.achievements[id]; });
+  }
+
+  function compare(local, remote) {
+    var l = covers(local, remote), r = covers(remote, local);
+    if (l && r) return 'same';
+    if (l) return 'localAhead';
+    if (r) return 'remoteAhead';
+    return 'diverged';
+  }
+
+  function summary(p) {
+    return {
+      achievements: Object.keys(p.achievements).length,
+      opened: p.stats.opened,
+      games: p.stats.games,
+      bestRounds: p.stats.bestRounds
+    };
+  }
+
   function load() {
     try { return normalize(JSON.parse(root.localStorage.getItem(KEY))); }
     catch (e) { return defaultProfile(); }
@@ -125,7 +148,8 @@
   var api = {
     DEFS: DEFS, COLOR_COUNT: COLOR_COUNT,
     defaultProfile: defaultProfile, normalize: normalize, value: value,
-    evaluate: evaluate, record: record, merge: merge, load: load, save: save
+    evaluate: evaluate, record: record, merge: merge, compare: compare, summary: summary,
+    load: load, save: save
   };
 
   if (typeof module !== 'undefined' && module.exports) module.exports = api;

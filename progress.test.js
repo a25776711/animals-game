@@ -83,6 +83,45 @@ t('合併不會改動輸入', () => {
   assert.equal(JSON.stringify([a, b]), snap);
 });
 
+t('compare：相同 / 一邊領先 / 各有對方沒有的（衝突）', () => {
+  const empty = P.defaultProfile();
+  const a = P.defaultProfile();
+  P.record(a, 'open', {}, 1);
+  const b = P.normalize(JSON.parse(JSON.stringify(a)));
+  assert.equal(P.compare(empty, empty), 'same');
+  assert.equal(P.compare(a, b), 'same');
+  assert.equal(P.compare(a, empty), 'localAhead');
+  assert.equal(P.compare(empty, a), 'remoteAhead');
+
+  P.record(a, 'match', { type: 'pair' }, 2);
+  P.record(b, 'start', { lucky: 4 }, 2);
+  assert.equal(P.compare(a, b), 'diverged');
+  assert.equal(P.compare(b, a), 'diverged');
+});
+
+t('compare：只有成就或幸運色不同也算各有進度', () => {
+  const a = P.defaultProfile(), b = P.defaultProfile();
+  a.achievements.first_open = 1;
+  b.luckyUsed[3] = true;
+  assert.equal(P.compare(a, b), 'diverged');
+});
+
+t('一邊領先時，合併結果等於領先那份（不會丟進度）', () => {
+  const ahead = P.defaultProfile();
+  for (let i = 0; i < 120; i++) P.record(ahead, 'open', {}, 5);
+  const behind = P.defaultProfile();
+  P.record(behind, 'open', {}, 3);
+  assert.equal(P.compare(ahead, behind), 'localAhead');
+  assert.deepEqual(P.merge(ahead, behind).stats, ahead.stats);
+});
+
+t('summary 摘要欄位', () => {
+  const p = P.defaultProfile();
+  P.record(p, 'open', {}, 1);
+  P.record(p, 'end', { rounds: 7, gained: 12 }, 2);
+  assert.deepEqual(P.summary(p), { achievements: 1, opened: 1, games: 1, bestRounds: 7 });
+});
+
 t('normalize：壞資料變回預設、負數與 NaN 變 0、保留合法成就', () => {
   assert.deepEqual(P.normalize(null), P.defaultProfile());
   assert.deepEqual(P.normalize('xx'), P.defaultProfile());

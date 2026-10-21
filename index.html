@@ -5,11 +5,22 @@
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, user-scalable=no">
   <meta name="theme-color" content="#ffe6d1">
   <title>wū guī 對對碰</title>
+  <script>
+    (function () {
+      var t = null;
+      try { t = localStorage.getItem('turtle.theme'); } catch (e) {}
+      if (t !== 'dark' && t !== 'light') {
+        t = window.matchMedia && matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+      }
+      document.documentElement.setAttribute('data-theme', t);
+    })();
+  </script>
   <link rel="stylesheet" href="style.css">
 </head>
 <body>
   <main id="app">
     <button id="backBtn" class="btn back hidden" type="button">← 返回</button>
+    <button id="themeBtn" class="btn theme" type="button"></button>
     <div id="toasts" class="toasts" aria-live="polite"></div>
 
     <section id="titleScreen" class="screen active" aria-label="標題">
@@ -25,7 +36,7 @@
       <h2 class="heading">選擇幸運色</h2>
       <div id="luckyPicker" class="lucky-picker" role="radiogroup" aria-label="幸運色"></div>
       <h2 class="heading sub">選擇起始包數</h2>
-      <div id="packOptions" class="pack-options"></div>
+      <div id="packOptions" class="pack-list" role="list"></div>
       <p class="rules">碰 +1・連線 +3・全家福 +5・幸運色 +1</p>
     </section>
 
@@ -61,6 +72,7 @@
 
     <section id="achScreen" class="screen scroll" aria-label="成就">
       <h2 class="heading" id="achTitle">成就</h2>
+      <p id="achNote" class="ach-note"></p>
       <div class="account hidden"></div>
       <div id="achList" class="ach-list"></div>
     </section>

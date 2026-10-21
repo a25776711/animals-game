@@ -16,7 +16,12 @@
     { id: 7, name: '橘黃', img: 'img/turtle-amber.png' },
     { id: 8, name: '黃',   img: 'img/turtle-yellow.png' }
   ];
-  var PACK_OPTIONS = [10, 20, 50];
+  var PACK_OPTIONS = [
+    { packs: 10, hint: '約 5 回合' },
+    { packs: 20, hint: '約 11 回合' },
+    { packs: 50, hint: '約 30 回合' }
+  ];
+  var THEME_KEY = 'turtle.theme';
   var MS = { open: 260, lucky: 900, match: 900, clear: 380 };
   var CLOUD_SAVE_DELAY = 3000;
   var LUCKY_KEY = 'turtle.lucky';
@@ -47,6 +52,7 @@
 
   var account = null;
   var cloudReady = false;
+  var syncing = false;
   var syncText = '';
   var cloudTimer = null;
 
@@ -90,6 +96,7 @@
   /* 雲端存檔 */
 
   function renderAccount() {
+    updateAchNote();
     document.querySelectorAll('.account').forEach(function (bar) {
       if (!Cloud || !Cloud.enabled) { bar.classList.add('hidden'); return; }
       bar.classList.remove('hidden');
@@ -129,22 +136,125 @@
     flushCloud().then(function () { return Cloud.signOut(); });
   }
 
+  function summaryColumn(title, p) {
+    var s = P.summary(p);
+    var col = document.createElement('div');
+    var head = document.createElement('b');
+    head.textContent = title;
+    col.appendChild(head);
+    [
+      ['成就', s.achievements + '/' + P.DEFS.length],
+      ['累計開包', s.opened],
+      ['玩過', s.games + ' 局'],
+      ['最佳回合', s.bestRounds]
+    ].forEach(function (r) {
+      var line = document.createElement('span');
+      var k = document.createElement('span');
+      var v = document.createElement('span');
+      k.textContent = r[0];
+      v.textContent = r[1];
+      line.appendChild(k);
+      line.appendChild(v);
+      col.appendChild(line);
+    });
+    return col;
+  }
+
+  function askConflict(local, remote) {
+    return new Promise(function (resolve) {
+      var overlay = document.createElement('div');
+      overlay.className = 'modal';
+      overlay.setAttribute('role', 'dialog');
+      overlay.setAttribute('aria-modal', 'true');
+      overlay.setAttribute('aria-label', '進度不一致');
+
+      var card = document.createElement('div');
+      card.className = 'modal-card';
+
+      var title = document.createElement('h3');
+      title.textContent = '進度不一致';
+      var text = document.createElement('p');
+      text.textContent = '這台裝置和雲端各有對方沒有的進度，請選擇要保留哪一份：';
+
+      var compare = document.createElement('div');
+      compare.className = 'compare';
+      compare.appendChild(summaryColumn('這台裝置', local));
+      compare.appendChild(summaryColumn('雲端', remote));
+
+      card.appendChild(title);
+      card.appendChild(text);
+      card.appendChild(compare);
+
+      function finish(choice) {
+        overlay.remove();
+        resolve(choice);
+      }
+
+      var first = null;
+      [
+        ['merge', '合併兩邊', '數值取較大、成就取聯集，不會丟進度'],
+        ['local', '只用這台裝置的', '雲端那份會被覆蓋'],
+        ['cloud', '只用雲端的', '這台裝置多出的進度會消失']
+      ].forEach(function (c) {
+        var b = document.createElement('button');
+        b.type = 'button';
+        b.className = 'btn choice ' + c[0];
+        b.appendChild(document.createTextNode(c[1]));
+        var sub = document.createElement('small');
+        sub.textContent = c[2];
+        b.appendChild(sub);
+        b.addEventListener('click', function () { finish(c[0]); });
+        card.appendChild(b);
+        if (!first) first = b;
+      });
+
+      var cancel = document.createElement('button');
+      cancel.type = 'button';
+      cancel.className = 'linkbtn';
+      cancel.textContent = '取消登入';
+      cancel.addEventListener('click', function () { finish('cancel'); });
+      card.appendChild(cancel);
+
+      overlay.appendChild(card);
+      document.body.appendChild(overlay);
+      first.focus();
+    });
+  }
+
+  function chooseProfile(local, remote) {
+    if (P.compare(local, remote) !== 'diverged') return Promise.resolve(P.merge(local, remote));
+    return askConflict(local, remote).then(function (choice) {
+      if (choice === 'merge') return P.merge(local, remote);
+      if (choice === 'local') return local;
+      if (choice === 'cloud') return remote;
+      return null;
+    });
+  }
+
   function syncFromCloud() {
+    if (syncing) return Promise.resolve();
+    syncing = true;
     syncText = '同步中…';
     renderAccount();
-    return Cloud.loadProfile().then(function (remote) {
-      profile = P.merge(profile, P.normalize(remote));
+    return Cloud.loadProfile().then(function (raw) {
+      return chooseProfile(profile, P.normalize(raw));
+    }).then(function (chosen) {
+      if (!chosen) {
+        syncText = '';
+        return Cloud.signOut();
+      }
+      profile = chosen;
       P.save(profile);
-      return Cloud.saveProfile(profile);
-    }).then(function () {
-      cloudReady = true;
-      syncText = '已同步';
-      renderAccount();
-      if (phase === 'ach') renderAchievements();
+      return Cloud.saveProfile(profile).then(function () {
+        cloudReady = true;
+        syncText = '已同步';
+        renderAccount();
+        if (phase === 'ach') renderAchievements();
+      });
     }).catch(function () {
       syncText = '同步失敗';
       renderAccount();
-    });
+    }).then(function () { syncing = false; });
   }
 
   function scheduleCloudSave() {
@@ -208,9 +318,16 @@
     message.classList.add('flash');
   }
 
+  function updateAchNote() {
+    $('achNote').textContent = account ? '成就已同步到你的 Google 帳號'
+      : Cloud && Cloud.enabled ? '成就存在這台裝置，登入 Google 可同步到雲端'
+      : '成就存在這台裝置的瀏覽器裡，清除瀏覽器資料會消失';
+  }
+
   function renderAchievements() {
     var done = P.DEFS.filter(function (d) { return profile.achievements[d.id]; }).length;
     $('achTitle').textContent = '成就 ' + done + '/' + P.DEFS.length;
+    updateAchNote();
     var list = $('achList');
     list.innerHTML = '';
     P.DEFS.forEach(function (d) {
@@ -402,14 +519,31 @@
 
   function buildPackButtons() {
     var wrap = $('packOptions');
-    PACK_OPTIONS.forEach(function (n) {
+    PACK_OPTIONS.forEach(function (o) {
       var b = document.createElement('button');
       b.type = 'button';
-      b.className = 'btn pack-btn';
-      b.textContent = n + ' 包';
-      b.addEventListener('click', function () { startGame(n); });
+      b.className = 'btn pack-row';
+      b.setAttribute('role', 'listitem');
+      var label = document.createElement('span');
+      label.textContent = o.packs + ' 包';
+      var hint = document.createElement('small');
+      hint.textContent = o.hint;
+      b.appendChild(label);
+      b.appendChild(hint);
+      b.addEventListener('click', function () { startGame(o.packs); });
       wrap.appendChild(b);
     });
+  }
+
+  function applyTheme(t) {
+    document.documentElement.setAttribute('data-theme', t);
+    var label = t === 'dark' ? '切換為淺色模式' : '切換為深色模式';
+    var themeBtn = $('themeBtn');
+    themeBtn.textContent = t === 'dark' ? '☀️' : '🌙';
+    themeBtn.setAttribute('aria-label', label);
+    themeBtn.title = label;
+    var meta = document.querySelector('meta[name="theme-color"]');
+    if (meta) meta.setAttribute('content', t === 'dark' ? '#181420' : '#ffe6d1');
   }
 
   screens.title.addEventListener('click', function (e) {
@@ -421,6 +555,11 @@
   $('againBtn').addEventListener('click', function () { show('start'); });
   spinBtn.addEventListener('click', playRound);
   cashOutBtn.addEventListener('click', function () { if (!busy && game) finishGame(); });
+  $('themeBtn').addEventListener('click', function () {
+    var next = document.documentElement.getAttribute('data-theme') === 'dark' ? 'light' : 'dark';
+    applyTheme(next);
+    try { localStorage.setItem(THEME_KEY, next); } catch (e) {}
+  });
   backBtn.addEventListener('click', function () {
     if (busy) return;
     if (phase === 'play') show('start');
@@ -430,12 +569,14 @@
 
   document.addEventListener('keydown', function (e) {
     if (e.key !== 'Enter' && e.key !== ' ') return;
+    if (e.target.closest && e.target.closest('button')) return;
     if (phase === 'title') show('start');
     else if (phase === 'play') { e.preventDefault(); playRound(); }
   });
   document.addEventListener('visibilitychange', function () { if (document.hidden) flushCloud(); });
 
   COLORS.forEach(function (c) { new Image().src = c.img; });
+  applyTheme(document.documentElement.getAttribute('data-theme') || 'light');
   buildLuckyPicker();
   buildPackButtons();
   renderAccount();
