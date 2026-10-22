@@ -789,6 +789,16 @@
     return row;
   }
 
+  function reportLink() {
+    var url = window.ReportConfig && window.ReportConfig.url;
+    if (!/^(https:\/\/|mailto:)/.test(url || '')) return null;
+    var a = el('a', 'linkbtn report-link', '回報問題或提供建議');
+    a.href = url;
+    a.target = '_blank';
+    a.rel = 'noopener noreferrer';
+    return a;
+  }
+
   function openSettings() {
     if (document.querySelector('.modal')) return;
     var m = openModal({ label: '設定', onClose: function () { $('settingsBtn').focus(); } });
@@ -813,6 +823,9 @@
         applyTheme(t);
         try { localStorage.setItem(THEME_KEY, t); } catch (e) {}
       }));
+
+    var report = reportLink();
+    if (report) card.appendChild(report);
 
     var done = el('button', 'btn choice merge', '完成');
     done.type = 'button';
