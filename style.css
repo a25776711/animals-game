@@ -44,7 +44,7 @@ p, h1, h2, h3, h4 { margin: 0; }
 .heading { font: 700 clamp(30px, 4vw, 46px)/1.3 var(--serif); letter-spacing: .04em; }
 .heading.sub { font-size: 28px; }
 .section-title { font: 700 22px/1.4 var(--serif); border-top: 1px solid var(--line); padding-top: 20px; }
-.rules, .ach-note, .game-note, .odds-table { font-size: 13px; line-height: 1.8; color: var(--muted); max-width: 720px; }
+.rules, .ach-note, .game-note { font-size: 13px; line-height: 1.8; color: var(--muted); max-width: 720px; }
 .btn { appearance: none; border: 1px solid var(--ink); background: transparent; border-radius: 2px; padding: 10px 18px; min-height: 44px; font-weight: 600; transition: background-color .15s, color .15s; }
 .btn.primary { background: var(--accent); color: var(--accent-text); border-color: var(--accent); padding: 13px 25px; font-size: 20px; }
 .secondary { font-size: 15px; }
@@ -383,3 +383,13 @@ p, h1, h2, h3, h4 { margin: 0; }
 .chat-form { width: min(100%, 460px); display: flex; gap: 8px; align-items: stretch; }
 .chat-form .name-input { flex: 1; min-width: 0; text-align: left; font-size: 16px; }
 .chat-form .btn { padding: 10px 18px; font-size: 16px; }
+.help-btn { flex: none; width: 28px; height: 28px; min-height: 0; padding: 0; border: 1px solid var(--ink); border-radius: 50%; background: transparent; color: var(--ink); font: 700 15px/1 var(--sans); cursor: help; }
+.help-btn:hover, .help-btn[aria-expanded="true"] { background: var(--ink); color: var(--paper); }
+.help-pop { position: fixed; z-index: 90; padding: 12px 14px; background: var(--panel); color: var(--ink); border: 1px solid var(--ink); border-radius: 6px; box-shadow: 0 10px 30px #0003; font-size: 14px; line-height: 1.7; pointer-events: auto; }
+.help-pop p { margin: 0; color: var(--ink); font-size: 14px; }
+.help-pop p:first-child { font-weight: 700; }
+.choice-row { display: flex; gap: 10px; align-items: center; }
+.choice-row .btn { flex: 1; }
+.gacha-actions { align-items: center; }
+.help-pop .help-grid { display: flex; flex-wrap: wrap; gap: 2px 16px; }
+.help-pop .help-grid span { white-space: nowrap; }

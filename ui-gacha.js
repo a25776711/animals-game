@@ -33,11 +33,6 @@
       screen.appendChild(el('h2', 'heading', '抽卡圖鑑'));
       screen.appendChild(app.walletRow(['turtles']));
 
-      var rates = G.RARITIES.map(function (r) { return r.name + ' ' + r.rate + '%'; }).join('・');
-      screen.appendChild(el('p', 'game-note',
-        rates + '。連續 ' + G.PITY_LIMIT + ' 抽沒出傳說，第 ' + G.PITY_LIMIT + ' 抽必出（含保底實際約 3.1%）。十連至少一張稀有。'));
-      screen.appendChild(el('p', 'game-note', '距離保底還有 ' + (G.PITY_LIMIT - p.pity) + ' 抽'));
-
       var actions = el('div', 'gacha-actions');
       [[1, G.COST.single, '單抽'], [10, G.COST.ten, '十連']].forEach(function (o) {
         var b = el('button', 'btn', o[2]);
@@ -47,6 +42,13 @@
         b.addEventListener('click', function () { draw(o[0], o[1]); });
         actions.appendChild(b);
       });
+      var rates = G.RARITIES.map(function (r) { return r.name + ' ' + r.rate + '%'; });
+      actions.appendChild(root.TurtleUICommon.help(app, '查看抽卡機率', [
+        '各稀有度機率',
+        rates,
+        '連續 ' + G.PITY_LIMIT + ' 抽沒出傳說，第 ' + G.PITY_LIMIT + ' 抽必出（含保底實際約 3.1%）。十連至少一張稀有。',
+        '距離保底還有 ' + (G.PITY_LIMIT - p.pity) + ' 抽'
+      ]));
       screen.appendChild(actions);
 
       if (lastDraw) {

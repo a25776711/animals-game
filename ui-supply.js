@@ -45,14 +45,13 @@
 
     function oddsText() {
       return E.CFG.wheel.slice().sort(function (a, b) { return a.amount - b.amount; })
-        .map(function (w) { return w.amount + '（' + w.weight + '%）'; }).join('　');
+        .map(function (w) { return w.amount + '（' + w.weight + '%）'; });
     }
 
     function choose(index) {
       var m = app.openModal({ label: '領取補給' });
       var card = m.card;
       card.appendChild(app.el('h3', null, '領取補給'));
-      card.appendChild(app.el('p', null, '直接領比較穩，轉盤可能多也可能少。'));
 
       var fixed = app.el('button', 'btn choice merge', '直接領 ' + E.CFG.dailyFixed + ' 錢');
       fixed.type = 'button';
@@ -64,9 +63,11 @@
       wheel.appendChild(app.el('small', null, '最多 350 = 7 次 50 包，最少 30 = 3 次 10 包'));
       wheel.addEventListener('click', function () { m.close(); claim(index, 'wheel'); });
 
+      var wheelRow = app.el('div', 'choice-row');
+      wheelRow.appendChild(wheel);
+      wheelRow.appendChild(root.TurtleUICommon.help(app, '查看轉盤機率', ['轉盤機率', oddsText()]));
       card.appendChild(fixed);
-      card.appendChild(wheel);
-      card.appendChild(app.el('p', 'odds-table', '轉盤機率：' + oddsText()));
+      card.appendChild(wheelRow);
       var cancel = app.el('button', 'linkbtn', '先不領');
       cancel.type = 'button';
       cancel.addEventListener('click', m.close);
