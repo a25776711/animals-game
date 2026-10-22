@@ -228,8 +228,16 @@
     return p.rev === 0;
   }
 
+  function sorted(v) {
+    if (Array.isArray(v)) return v.map(sorted);
+    if (!v || typeof v !== 'object') return v;
+    var out = {};
+    Object.keys(v).sort().forEach(function (k) { out[k] = sorted(v[k]); });
+    return out;
+  }
+
   function content(p) {
-    return JSON.stringify([p.stats, p.luckyUsed, p.achievements, p.wallet, p.daily, p.gifts, p.cards, p.pity, p.pet, p.shop]);
+    return JSON.stringify(sorted([p.stats, p.luckyUsed, p.achievements, p.wallet, p.daily, p.gifts, p.cards, p.pity, p.pet, p.shop]));
   }
 
   function sameContent(a, b) {
@@ -239,6 +247,7 @@
   function decideSync(local, remote, baseRev) {
     if (!remote || isFresh(remote)) return 'upload';
     if (isFresh(local)) return 'download';
+    if (local.rev === remote.rev && local.updatedAt === remote.updatedAt) return 'same';
     if (sameContent(local, remote)) return 'same';
     if (baseRev != null) {
       var localChanged = local.rev > baseRev;

@@ -152,6 +152,46 @@ t('同步判斷：內容相同不打擾', () => {
   assert.equal(P.decideSync(a, P.clone(a), null), 'same');
 });
 
+// Firestore 讀回來時，物件的欄位是照字母排序，不是照寫入的先後
+const sortKeys = (v) => Array.isArray(v) ? v.map(sortKeys)
+  : v && typeof v === 'object' ? Object.fromEntries(Object.keys(v).sort().map(k => [k, sortKeys(v[k])]))
+  : v;
+
+const unsorted = () => touched(p => {
+  P.record(p, 'open', {}, 10);
+  p.achievements = { [P.DEFS[3].id]: 30, [P.DEFS[0].id]: 10, [P.DEFS[5].id]: 20 };
+  p.cards = { '8-3': 1, '0-0': 2, '3-1': 1 };
+  p.shop.owned = { 'theme-sakura': true, 'hat-bow': true };
+});
+
+t('同步判斷：只是欄位順序不同（Firestore 會照字母排）不算不一致', () => {
+  const a = unsorted();
+  const remote = P.normalize(sortKeys(JSON.parse(JSON.stringify(a))));
+  assert.notEqual(JSON.stringify(Object.keys(a.achievements)), JSON.stringify(Object.keys(remote.achievements)));
+  assert.ok(P.sameContent(a, remote));
+  assert.equal(P.decideSync(a, remote, a.rev), 'same');
+  assert.equal(P.decideSync(a, remote, null), 'same');
+});
+
+t('同步判斷：關分頁時來不及記下同步點，也不會誤問（兩邊版本和更新時間一樣就是同一份）', () => {
+  const a = unsorted();
+  const remote = P.clone(a);
+  remote.pet.fullness = (remote.pet.fullness + 7) % 100;
+  assert.equal(P.sameContent(a, remote), false);
+  assert.equal(P.decideSync(a, remote, a.rev - 1), 'same');
+  assert.equal(P.decideSync(a, remote, null), 'same');
+});
+
+t('同步判斷：真的各自有新進度，版本一樣也要問', () => {
+  const base = unsorted();
+  const a = P.clone(base), b = P.clone(base);
+  P.record(a, 'open', {}, 50);
+  P.record(b, 'lucky', {}, 60);
+  assert.equal(a.rev, b.rev);
+  assert.equal(P.decideSync(a, b, base.rev - 1), 'ask');
+  assert.equal(P.decideSync(a, b, null), 'ask');
+});
+
 t('同步判斷：只有一邊在上次同步後有變動 → 不用問', () => {
   const base = rich();
   const local = P.clone(base);
