@@ -354,6 +354,13 @@
     ok.focus();
   }
 
+  var syncRetries = 0;
+
+  function failText(e, base) {
+    var code = e && e.code ? '（' + e.code + '）' : '';
+    return e && e.code === 'unavailable' ? base + code + '：連不上雲端，可能被瀏覽器或廣告攔截擋住' : base + code;
+  }
+
   function syncFromCloud() {
     if (syncing) return Promise.resolve();
     syncing = true;
@@ -377,13 +384,18 @@
       return Cloud.saveProfile(profile).then(function () {
         saveBase(uid, rev);
         cloudReady = true;
+        syncRetries = 0;
         syncText = '已同步';
         renderAccount();
         if (phase === 'ach') renderAchievements();
       });
-    }).catch(function () {
-      syncText = '同步失敗';
+    }).catch(function (e) {
+      syncText = failText(e, '同步失敗');
       renderAccount();
+      if (syncRetries++ < 3) {
+        clearTimeout(cloudRetry);
+        cloudRetry = setTimeout(function () { if (account && !cloudReady) syncFromCloud(); }, CLOUD_RETRY_DELAY);
+      }
     }).then(function () { syncing = false; });
   }
 
@@ -402,9 +414,9 @@
       clearTimeout(cloudRetry);
       saveBase(who.uid, rev);
       if (account === who) { syncText = '已同步'; renderAccount(); }
-    }).catch(function () {
+    }).catch(function (e) {
       if (account !== who) return;
-      syncText = '同步失敗，稍後重試';
+      syncText = failText(e, '同步失敗，稍後重試');
       renderAccount();
       clearTimeout(cloudRetry);
       cloudRetry = setTimeout(flushCloud, CLOUD_RETRY_DELAY);
@@ -999,6 +1011,7 @@
     Cloud.onAuth(function (user) {
       account = user;
       cloudReady = false;
+      syncRetries = 0;
       syncText = '';
       renderAccount();
       if (user) syncFromCloud();
