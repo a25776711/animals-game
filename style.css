@@ -303,6 +303,8 @@ p, h1, h2, h3, h4 { margin: 0; }
   #titleScreen > .menu-row { gap: 8px; }
   #titleScreen > .menu-row .btn { font-size: 13px; gap: 6px; }
   #titleScreen .ink-icon { width: 22px; height: 22px; }
+  #titleScreen { top: 50px; padding-top: 4px; }
+  #titleScreen .logo { margin-top: 0; }
   #startScreen.active { grid-template-columns: 1fr; gap: 24px; }
   .config-col { gap: 14px; }
   .lucky-picker { max-width: none; grid-template-columns: repeat(3,1fr); }
