@@ -63,7 +63,7 @@
       img.alt = pet.name;
       body.appendChild(img);
       var hat = pet.accessory && Shop.find(pet.accessory);
-      if (hat && hat.emoji) body.appendChild(root.TurtleUICommon.icon(hat.id.replace('hat-', ''), 'pet-hat'));
+      if (hat) body.appendChild(root.TurtleUICommon.icon(hat.id.replace('hat-', ''), 'pet-hat'));
       scale.appendChild(body);
       box.appendChild(scale);
       if (bubble) box.appendChild(el('div', 'pet-bubble', bubble));

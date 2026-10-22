@@ -149,7 +149,7 @@ t('商品目錄：id 不重複、價格是非負整數、預設品免費、配�
     assert.ok(Number.isInteger(i.price) && i.price >= 0, i.id);
     assert.ok(Shop.TYPES.some(ty => ty.id === i.type), i.id);
     assert.match(i.id, /^(theme|board|hat)-[a-z]+$/);
-    if (i.type === 'hat') assert.ok(i.emoji, i.id);
+    if (i.type === 'hat') assert.ok(require('fs').existsSync('img/ink-' + i.id.replace('hat-', '') + '.svg'), i.id);
     else assert.match(i.skin, /^[a-z]+$/);
   });
   assert.equal(Shop.find('theme-default').price, 0);

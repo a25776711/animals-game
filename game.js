@@ -7,7 +7,6 @@
   var Cloud = window.Cloud;
   var Sound = window.TurtleSound;
   var Fx = window.TurtleFx;
-  var Donate = window.TurtleDonate;
 
   var COLORS = [
     { id: 0, name: '綠',   img: 'img/turtle-green.png' },
@@ -934,7 +933,7 @@
 
   screens.title.addEventListener('click', function (e) {
     var blocked = e.composedPath().some(function (n) {
-      return n.id === 'donateBtn' || n.classList && (n.classList.contains('account') || n.classList.contains('menu-row') || n.classList.contains('wallet-row'));
+      return n.classList && (n.classList.contains('account') || n.classList.contains('menu-row') || n.classList.contains('wallet-row'));
     });
     if (blocked) return;
     show('start');
@@ -963,10 +962,6 @@
     else if (phase === 'play') { e.preventDefault(); playRound(); }
   });
   document.addEventListener('visibilitychange', function () { if (document.hidden) flushCloud(); });
-  if (Donate && Donate.enabled()) {
-    $('donateBtn').classList.remove('hidden');
-    $('donateBtn').addEventListener('click', function () { Donate.open(app); });
-  }
   document.addEventListener('click', function (e) {
     var b = e.target.closest && e.target.closest('button');
     if (b && !b.disabled) fx('tap');

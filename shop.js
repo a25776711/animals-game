@@ -22,12 +22,12 @@
     { id: 'board-shell', type: 'board', skin: 'shell', name: '龜殼紋', price: 400 },
     { id: 'board-check', type: 'board', skin: 'check', name: '方格', price: 400 },
     { id: 'board-dots', type: 'board', skin: 'dots', name: '點點', price: 400 },
-    { id: 'hat-flower', type: 'hat', name: '小花', emoji: '🌸', price: 150 },
-    { id: 'hat-glasses', type: 'hat', name: '墨鏡', emoji: '🕶️', price: 200 },
-    { id: 'hat-bow', type: 'hat', name: '蝴蝶結', emoji: '🎀', price: 200 },
-    { id: 'hat-grad', type: 'hat', name: '學士帽', emoji: '🎓', price: 300 },
-    { id: 'hat-top', type: 'hat', name: '紳士帽', emoji: '🎩', price: 400, level: 10 },
-    { id: 'hat-crown', type: 'hat', name: '皇冠', emoji: '👑', price: 800, level: 10 }
+    { id: 'hat-flower', type: 'hat', name: '小花', price: 150 },
+    { id: 'hat-glasses', type: 'hat', name: '墨鏡', price: 200 },
+    { id: 'hat-bow', type: 'hat', name: '蝴蝶結', price: 200 },
+    { id: 'hat-grad', type: 'hat', name: '學士帽', price: 300 },
+    { id: 'hat-top', type: 'hat', name: '紳士帽', price: 400, level: 10 },
+    { id: 'hat-crown', type: 'hat', name: '皇冠', price: 800, level: 10 }
   ];
 
   function find(id) {
