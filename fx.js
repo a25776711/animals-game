@@ -129,7 +129,7 @@
 
   var SCENES = {
     title: 'title', start: 'title', play: 'play', result: 'result', ach: 'hub', supply: 'supply',
-    hub: 'hub', pet: 'pet', shop: 'shop', race: 'race', bj: 'bj', mem: 'mem', gacha: 'gacha'
+    hub: 'hub', pet: 'pet', shop: 'shop', race: 'race', bj: 'bj', mem: 'mem', gacha: 'gacha', chat: 'hub'
   };
 
   function mulberry(seed) {

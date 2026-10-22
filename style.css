@@ -360,3 +360,26 @@ p, h1, h2, h3, h4 { margin: 0; }
   *, *::before, *::after { animation-duration: .01ms !important; animation-iteration-count: 1 !important; transition-duration: .01ms !important; scroll-behavior: auto !important; }
 }
 .report-link { align-self: center; text-decoration: underline; }
+.chat-list {
+  width: min(100%, 460px);
+  height: min(46vh, 380px);
+  min-height: 200px;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 10px;
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  background: var(--paper);
+  user-select: text;
+  -webkit-user-select: text;
+}
+.chat-msg { max-width: 88%; align-self: flex-start; padding: 6px 10px; border: 1px solid var(--line); border-radius: 10px; }
+.chat-msg.mine { align-self: flex-end; border-color: var(--c-lucky); }
+.chat-head { display: flex; gap: 10px; align-items: baseline; font-size: 13px; }
+.chat-head time { opacity: .6; font-size: 12px; }
+.chat-text { overflow-wrap: anywhere; line-height: 1.5; }
+.chat-form { width: min(100%, 460px); display: flex; gap: 8px; align-items: stretch; }
+.chat-form .name-input { flex: 1; min-width: 0; text-align: left; font-size: 16px; }
+.chat-form .btn { padding: 10px 18px; font-size: 16px; }

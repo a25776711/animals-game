@@ -1,0 +1,27 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" fill="none">
+  <title>龜殼對話框</title>
+  <defs>
+    <linearGradient id="chat-leaf" x1="17" y1="18" x2="43" y2="51" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#b6e5ae"/>
+      <stop offset="1" stop-color="#78c97c"/>
+    </linearGradient>
+    <linearGradient id="chat-sun" x1="36" y1="8" x2="53" y2="27" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#ffe5a2"/>
+      <stop offset="1" stop-color="#efc46c"/>
+    </linearGradient>
+  </defs>
+  <!-- Two softly uneven bubbles, outlined like the original turtle shells. -->
+  <path d="M37 7C30 7 26 11 26 17c0 6 5 10 12 10h7l9 5-2-10c4-3 5-7 3-10C52 8 45 6 37 7Z"
+    fill="url(#chat-sun)" stroke="#946d2b" stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round"/>
+  <path d="M27 18C15 17 7 24 7 35c-1 8 4 14 12 17l-2 8 12-7c13 1 24-5 25-16 1-11-9-19-27-19Z"
+    fill="url(#chat-leaf)" stroke="#245d30" stroke-width="3.8" stroke-linecap="round" stroke-linejoin="round"/>
+  <path d="m25 19 1 8m17-5-6 8m16 7-11 1m-1 12-5-8M15 47l6-7M8 31l13 2"
+    stroke="#32733d" stroke-width="2.8" stroke-linecap="round" stroke-linejoin="round"/>
+  <path d="M26 27c5-2 12 0 15 5 3 5 0 10-5 13-5 2-12 0-15-5-3-5-1-10 5-13Z"
+    fill="#c7ebbd" stroke="#32733d" stroke-width="2.8" stroke-linejoin="round"/>
+  <g fill="#245d30">
+    <circle cx="25.5" cy="35.8" r="1.6"/>
+    <circle cx="31" cy="35.8" r="1.6"/>
+    <circle cx="36.5" cy="35.8" r="1.6"/>
+  </g>
+</svg>

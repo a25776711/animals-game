@@ -5,7 +5,7 @@ const t = (name, fn) => { fn(); console.log('ok  -', name); };
 const ids = Object.keys(Fx.TRACKS);
 
 t('每個畫面都對得到一首存在的曲子', () => {
-  const screens = ['title', 'start', 'play', 'result', 'ach', 'supply', 'hub', 'pet', 'shop', 'race', 'bj', 'mem', 'gacha'];
+  const screens = ['title', 'start', 'play', 'result', 'ach', 'supply', 'hub', 'pet', 'shop', 'race', 'bj', 'mem', 'gacha', 'chat'];
   screens.forEach((s) => assert.ok(Fx.TRACKS[Fx.SCENES[s]], s));
 });
 

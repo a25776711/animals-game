@@ -30,9 +30,10 @@
     { id: 'mem', name: '翻牌記憶', desc: '報名 50 隻烏龜，步數越少獎勵越多' },
     { id: 'gacha', name: '抽卡圖鑑', desc: '抽 4 種稀有度的烏龜卡，集滿 36 種' },
     { id: 'pet', name: '養龜', desc: '餵小龜長大，替牠換顏色、戴帽子' },
-    { id: 'shop', name: '裝飾商店', desc: '買背景、棋盤花紋和小龜的配件' }
+    { id: 'shop', name: '裝飾商店', desc: '買背景、棋盤花紋和小龜的配件' },
+    { id: 'chat', name: '聊天室', desc: '跟所有玩家聊天，要先登入 Google 並取一個暱稱' }
   ];
-  var BACK = { start: 'title', hub: 'title', supply: 'title', race: 'hub', bj: 'hub', mem: 'hub', gacha: 'hub', pet: 'hub', shop: 'hub' };
+  var BACK = { start: 'title', hub: 'title', supply: 'title', race: 'hub', bj: 'hub', mem: 'hub', gacha: 'hub', pet: 'hub', shop: 'hub', chat: 'hub' };
 
   var THEME_KEY = 'turtle.theme';
   var LUCKY_KEY = 'turtle.lucky';
@@ -184,6 +185,7 @@
   /* 導覽 */
 
   function show(name) {
+    if (phase === 'chat' && name !== 'chat' && ui.chat) ui.chat.leave();
     phase = name;
     Object.keys(screens).forEach(function (k) {
       screens[k].classList.toggle('active', k === name);
@@ -926,6 +928,8 @@
     walletRow: walletRow,
     refreshWallets: refreshWallets,
     setBusy: function (b) { modBusy = !!b; },
+    account: function () { return account; },
+    signIn: function () { onSignIn(); },
     fx: fx,
     mood: function (id) { if (Fx) Fx.mood(id); },
     Sound: Sound
@@ -988,6 +992,7 @@
   ui.mem = window.TurtleMemoryUI.create(app);
   ui.pet = window.TurtlePetUI.create(app);
   ui.shop = window.TurtleShopUI.create(app);
+  ui.chat = window.TurtleChatUI.create(app);
   applySkin();
   renderAccount();
   if (Cloud && Cloud.enabled) {
