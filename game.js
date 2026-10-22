@@ -839,6 +839,11 @@
 
     var report = reportLink();
     if (report) card.appendChild(report);
+    var privacy = el('a', 'linkbtn report-link', '隱私與授權');
+    privacy.href = 'privacy.html';
+    privacy.target = '_blank';
+    privacy.rel = 'noopener';
+    card.appendChild(privacy);
 
     var done = el('button', 'btn choice merge', '完成');
     done.type = 'button';

@@ -1,0 +1,54 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>隱私與授權 · wū guī 對對碰</title>
+  <meta name="description" content="wū guī 對對碰 的隱私與授權說明。">
+  <script>
+    (function () {
+      var t = null;
+      try { t = localStorage.getItem('turtle.theme'); } catch (e) {}
+      if (t !== 'dark' && t !== 'light') {
+        t = window.matchMedia && matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+      }
+      document.documentElement.setAttribute('data-theme', t);
+    })();
+  </script>
+  <style>
+    :root { --bg: #eeeadd; --ink: #263e32; --muted: #59684e; --line: #b6b9a4; --accent: #a7412d; color-scheme: light; }
+    :root[data-theme="dark"] { --bg: #182920; --ink: #e8e7d5; --muted: #b8c2ac; --line: #566b56; --accent: #e9a281; color-scheme: dark; }
+    * { box-sizing: border-box; }
+    body { margin: 0; background: var(--bg); color: var(--ink); font: 16px/1.9 "PingFang TC", "Microsoft JhengHei", "Noto Sans TC", system-ui, sans-serif; }
+    main { max-width: 640px; margin: 0 auto; padding: 28px 22px 80px; }
+    h1, h2 { font-family: "Kaiti TC", "DFKai-SB", "KaiTi", "Microsoft JhengHei", serif; line-height: 1.35; }
+    h1 { font-size: 34px; margin: 16px 0 6px; }
+    h2 { font-size: 22px; margin: 34px 0 6px; padding-top: 18px; border-top: 1px solid var(--line); }
+    p, li { margin: 8px 0; }
+    ul { padding-left: 22px; }
+    a { color: var(--accent); text-underline-offset: 3px; }
+    .back { font-size: 15px; }
+  </style>
+</head>
+<body>
+  <main>
+    <a class="back" href="./">← 回到遊戲</a>
+    <h1>隱私與授權</h1>
+
+    <h2>隱私</h2>
+    <ul>
+      <li>不登入也能玩，進度只存在你自己的瀏覽器，不會傳給我。</li>
+      <li>用 Google 登入的話，進度會存到雲端，這樣才能換裝置接著玩，也才能用聊天室。</li>
+      <li>聊天室的暱稱和你說的話，登入的玩家都看得到，請不要留真實姓名、電話或住址。</li>
+      <li>想請我刪掉你說過的話或暱稱，到設定裡的「回報問題或提供建議」告訴我。</li>
+    </ul>
+
+    <h2>授權</h2>
+    <p>© 2026 kaven，保留所有權利。</p>
+    <ul>
+      <li><b>歡迎</b>：玩、分享連結、截圖、拍影片、直播。</li>
+      <li><b>請先問我</b>：想複製程式碼、烏龜圖片，或拿去改編、再發布，請先到「回報問題」聯絡我。</li>
+    </ul>
+  </main>
+</body>
+</html>
