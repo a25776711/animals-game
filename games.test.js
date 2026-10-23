@@ -31,8 +31,6 @@ t('rng：shuffle 保留所有元素且不改動原陣列', () => {
   assert.ok(r >= 0 && r < 1);
 });
 
-/* 抽卡 */
-
 t('抽卡：稀有度機率加總 100，十連價為單抽 9 折', () => {
   assert.equal(G.RARITIES.reduce((s, r) => s + r.rate, 0), 100);
   assert.equal(G.COST.ten, G.COST.single * 10 * 0.9);
@@ -100,8 +98,6 @@ t('抽卡：套用結果 → 卡片數量、保底、統計與成就', () => {
   assert.deepEqual([p.stats.gachaDraws, p.stats.legendaries], [3, 2]);
   assert.deepEqual(unlocked.map(d => d.id).sort(), ['gacha_1', 'legend_1']);
 });
-
-/* 21 點 */
 
 t('21 點：手牌點數（A 可當 1 或 11）', () => {
   assert.deepEqual(B.handValue([card('A'), card('K')]), { total: 21, soft: true, bust: false, blackjack: true });
@@ -215,8 +211,6 @@ t('21 點：用「17 點以上停牌」的簡單策略，長期莊家略占優�
   assert.ok(edge < -0.02 && edge > -0.10, 'edge=' + edge.toFixed(4));
 });
 
-/* 賽跑 */
-
 t('賽跑：機率加總為 1，賠率約為 0.9 / 機率（無條件捨去到小數一位）', () => {
   const r = Race.makeRace(seeded(5));
   assert.equal(r.probs.length, 9);
@@ -265,8 +259,6 @@ t('賽跑：賠率回報捨去小數', () => {
   assert.equal(Race.payout(50, 3.3), 165);
   assert.equal(Race.payout(10, 2.55), 25);
 });
-
-/* 翻牌記憶 */
 
 t('翻牌：16 張牌、8 種顏色各 2 張，id 連續', () => {
   const g = M.newGame(seeded(4));

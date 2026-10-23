@@ -7,7 +7,6 @@ node_modules/
 .DS_Store
 Thumbs.db
 
-# Unity
 [Ll]ibrary/
 [Tt]emp/
 [Oo]bj/
@@ -26,5 +25,9 @@ ProjectSettings/
 *.pdb
 *.mdb
 
-# 給 GPT 的風格說明（自己產生，不上傳）
 STYLE-BRIEF.md
+*-BRIEF.md
+*.local.md
+NOTES*.md
+notes/
+docs-local/

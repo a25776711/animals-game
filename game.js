@@ -94,8 +94,6 @@
 
   function fx(name, a, b) { if (Fx) Fx.play(name, a, b); }
 
-  /* 通用元件 */
-
   function toastText(text, silent) {
     var t = el('div', 'toast', text);
     $('toasts').appendChild(t);
@@ -135,8 +133,6 @@
     fx('open');
     return { card: card, close: close };
   }
-
-  /* 錢包 */
 
   function walletPill(kind) {
     var pill = el('div', 'wallet-pill');
@@ -182,8 +178,6 @@
     $('supplyDot').classList.toggle('hidden', !supplyReady());
   }
 
-  /* 導覽 */
-
   function show(name) {
     if (phase === 'chat' && name !== 'chat' && ui.chat) ui.chat.leave();
     phase = name;
@@ -211,8 +205,6 @@
     P.save(profile);
     scheduleCloudSave();
   }
-
-  /* 雲端存檔 */
 
   function renderAccount() {
     updateAchNote();
@@ -423,8 +415,6 @@
     });
   }
 
-  /* 畫面 */
-
   function buildBoard() {
     board.innerHTML = '';
     cells = [];
@@ -499,8 +489,6 @@
       list.appendChild(card);
     });
   }
-
-  /* 遊戲流程 */
 
   function saveSession() {
     if (!game || game.finished) return;
@@ -687,8 +675,6 @@
     stay.focus();
   }
 
-  /* 開局頁 */
-
   function buildLuckyPicker() {
     var wrap = $('luckyPicker');
     COLORS.forEach(function (c) {
@@ -744,8 +730,6 @@
       : '一包 = 一錢。碰 +1・連線 +3・全家福 +5・幸運色 +1';
     startSupplyBtn.classList.toggle('hidden', !broke);
   }
-
-  /* 設定 */
 
   function applySkin() {
     document.documentElement.setAttribute('data-skin', profile.shop.theme);
@@ -855,8 +839,6 @@
     done.focus();
   }
 
-  /* 小遊戲大廳 */
-
   function buildHub() {
     var list = $('hubList');
     HUB_GAMES.forEach(function (g) {
@@ -873,8 +855,6 @@
       list.appendChild(b);
     });
   }
-
-  /* 提示：還有沒做完或可以玩的東西 */
 
   var HINT_FIRST = 14000;
   var HINT_REPEAT = 30000;
@@ -930,8 +910,6 @@
     clearNudge();
     if (hintCount < HINT_MAX) hintTimer = setTimeout(fireHint, hintCount ? HINT_REPEAT : HINT_FIRST);
   }
-
-  /* 事件與初始化 */
 
   var app = {
     COLORS: COLORS,

@@ -17,8 +17,6 @@
   };
   var PENTA = { major: [0, 1, 2, 4, 5], minor: [0, 2, 3, 4, 6], dorian: [0, 2, 3, 4, 5] };
 
-  /* 曲目：每首只是一組參數，旋律由種子決定、每次播放都一樣 */
-
   var BASE = {
     scale: 'major', root: 57, swing: 0, seventh: false,
     prog: [0, 5, 3, 4],
@@ -238,8 +236,6 @@
     return;
   }
 
-  /* 以下需要瀏覽器的 Web Audio */
-
   var Sound = root.TurtleSound;
   var ctx = null;
   var sfxBus = null;
@@ -299,8 +295,6 @@
   }
 
   function ready() { return !!ctx && ctx.state !== 'closed'; }
-
-  /* 發聲零件 */
 
   function note(freq, dur, o) {
     var t = o.t != null ? o.t : now();
@@ -478,8 +472,6 @@
     duckBus.gain.setTargetAtTime(0.35, t, 0.05);
     duckBus.gain.setTargetAtTime(1, t + (sec || 1.6), 0.4);
   }
-
-  /* 背景音樂 */
 
   function stepSeconds(tr) { return 60 / tr.bpm / 4; }
 

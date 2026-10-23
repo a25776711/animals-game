@@ -152,7 +152,6 @@ t('同步判斷：內容相同不打擾', () => {
   assert.equal(P.decideSync(a, P.clone(a), null), 'same');
 });
 
-// Firestore 讀回來時，物件的欄位是照字母排序，不是照寫入的先後
 const sortKeys = (v) => Array.isArray(v) ? v.map(sortKeys)
   : v && typeof v === 'object' ? Object.fromEntries(Object.keys(v).sort().map(k => [k, sortKeys(v[k])]))
   : v;
