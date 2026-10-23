@@ -604,7 +604,10 @@
       var ev = events[n];
       var label = TYPE_NAME[ev.type];
       if (ev.type !== 'family') label += '・' + COLORS[game.grid[ev.cells[0]]].name;
-      ev.cells.forEach(function (c) { cells[c].classList.add('match'); });
+      ev.cells.forEach(function (c) {
+        cells[c].classList.remove('lucky');
+        cells[c].classList.add('match');
+      });
       announce(label + '！+' + ev.packs + ' 包', ev.type);
       fx(ev.type);
       await Promise.all([wait(MS.match), Sound.play(ev.type)]);
